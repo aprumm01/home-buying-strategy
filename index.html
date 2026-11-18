@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Home Buying Scenarios</title>
+<title>Home Buying Strategy Calculator</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -20,121 +20,191 @@
     --radius: 10px; --radius-lg: 16px;
   }
   html { scroll-behavior: smooth; }
-  body { font-family: 'DM Sans', sans-serif; background: var(--surface); color: var(--ink); font-size: 18px; line-height: 1.6; min-height: 100vh; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--surface); color: var(--ink); font-size: 16px; line-height: 1.6; min-height: 100vh; }
 
-  .header { background: var(--ink); color: var(--white); padding: 3rem 2rem 2.5rem; position: relative; overflow: hidden; }
+  .header { background: var(--ink); color: var(--white); padding: 2rem 2rem 1.75rem; position: relative; overflow: hidden; }
   .header::before { content: ''; position: absolute; top: -60px; right: -60px; width: 280px; height: 280px; border-radius: 50%; background: rgba(255,255,255,0.04); }
-  .header-inner { max-width: 980px; margin: 0 auto; position: relative; }
-  .header-eyebrow { font-family: 'DM Mono', monospace; font-size: 14px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.45); margin-bottom: 0.75rem; }
-  .header h1 { font-family: 'DM Serif Display', serif; font-size: clamp(32px, 5vw, 52px); font-weight: 400; line-height: 1.15; margin-bottom: 0.75rem; color: var(--white); }
-  .header h1 em { font-style: italic; color: rgba(255,255,255,0.55); }
-  .header-sub { font-size: 17px; color: rgba(255,255,255,0.5); max-width: 560px; line-height: 1.7; }
+  .header-inner { max-width: 948px; margin: 0 auto; position: relative; }
+  .header h1 { font-family: 'DM Serif Display', serif; font-size: clamp(26px, 4vw, 38px); font-weight: 400; line-height: 1.2; margin-bottom: 0.4rem; color: var(--white); }
+  .header-sub { font-size: 15px; color: rgba(255,255,255,0.5); max-width: 600px; line-height: 1.5; }
 
-  .slider-bar { background: var(--white); border-bottom: 1px solid var(--border); padding: 1.25rem 2rem; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
-  .slider-inner { max-width: 980px; margin: 0 auto; display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; }
-  .slider-label { font-family: 'DM Mono', monospace; font-size: 14px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); white-space: nowrap; }
-  .slider-track { flex: 1; min-width: 200px; display: flex; align-items: center; gap: 1rem; }
-  input[type=range] { flex: 1; -webkit-appearance: none; height: 4px; background: var(--surface-3); border-radius: 2px; outline: none; cursor: pointer; }
-  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%; background: var(--ink); border: 3px solid var(--white); box-shadow: 0 0 0 1.5px var(--ink); transition: transform 0.15s; cursor: grab; }
-  input[type=range]::-webkit-slider-thumb:active { transform: scale(1.2); cursor: grabbing; }
-  .price-display { font-family: 'DM Serif Display', serif; font-size: 30px; font-weight: 400; color: var(--ink); min-width: 140px; text-align: right; }
-  .slider-ticks { display: flex; justify-content: space-between; width: 100%; margin-top: 4px; }
-  .slider-ticks span { font-family: 'DM Mono', monospace; font-size: 14px; color: var(--ink-4); }
+  .main { max-width: 980px; margin: 0 auto; padding: 1.5rem 1rem; }
 
-  .tabs-wrap { max-width: 980px; margin: 0 auto; padding: 1.5rem 2rem 0; }
-  .tabs { display: flex; gap: 3px; border-bottom: 1.5px solid var(--border); overflow-x: auto; scrollbar-width: none; }
-  .tabs::-webkit-scrollbar { display: none; }
-  .tab-btn { font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500; padding: 0.6rem 1.1rem; background: none; border: none; border-bottom: 2.5px solid transparent; margin-bottom: -1.5px; cursor: pointer; color: var(--ink-3); white-space: nowrap; transition: color 0.15s, border-color 0.15s, background 0.15s; border-radius: 4px 4px 0 0; }
-  .tab-btn:hover { color: var(--ink); background: var(--surface-2); }
-  .tab-btn.active { color: var(--ink); border-bottom-color: var(--ink); }
+  /* Input sections */
+  .input-section { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem; margin-bottom: 1rem; }
+  .input-section-title { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 1rem; }
+  .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px 16px; align-items: end; }
+  .input-row { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: end; }
 
-  .content { max-width: 980px; margin: 0 auto; padding: 2rem; }
-  .panel { display: none; }
-  .panel.active { display: block; }
+  /* Field grid: 3 semantic groups */
+  .field-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  @media (max-width: 800px) { .field-grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 540px) { .field-grid { grid-template-columns: 1fr; } }
 
-  .scenario-header { margin-bottom: 1.75rem; }
-  .scenario-eyebrow { font-family: 'DM Mono', monospace; font-size: 14px; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.4rem; }
-  .scenario-header h2 { font-family: 'DM Serif Display', serif; font-size: 36px; font-weight: 400; line-height: 1.2; margin-bottom: 0.5rem; }
-  .scenario-header p { font-size: 17px; color: var(--ink-3); max-width: 640px; line-height: 1.7; }
+  .field-group { display: flex; flex-direction: column; gap: 12px; }
+  .field-group .form-group { display: flex; flex-direction: column; gap: 3px; }
+  .field-group .form-input,
+  .field-group .form-select { width: 100%; }
 
-  .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(175px, 1fr)); gap: 10px; margin-bottom: 1.25rem; }
-  .metric { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.125rem; transition: border-color 0.15s, box-shadow 0.15s; }
-  .metric:hover { border-color: var(--border-strong); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-  .metric-label { font-size: 14px; color: var(--ink-4); text-transform: uppercase; letter-spacing: 0.06em; font-family: 'DM Mono', monospace; margin-bottom: 5px; }
-  .metric-value { font-size: 24px; font-weight: 500; color: var(--ink); line-height: 1.2; }
-  .metric-sub { font-size: 14px; color: var(--ink-3); margin-top: 4px; }
+  .down-payment-control { display: flex; gap: 6px; align-items: center; }
+  .down-payment-control .form-input { flex: 1; min-width: 50px; }
 
-  .breakdown { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 1.25rem; }
-  .breakdown-title { font-size: 14px; font-family: 'DM Mono', monospace; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); padding: 0.8rem 1.125rem; border-bottom: 1px solid var(--border); background: var(--surface-2); }
-  .breakdown-row { display: flex; justify-content: space-between; align-items: center; padding: 0.7rem 1.125rem; border-bottom: 1px solid var(--border); font-size: 16px; transition: background 0.12s; }
+  .field-hint { font-size: 12px; color: var(--ink-4); margin-top: -4px; font-family: 'DM Mono', monospace; }
+
+  .form-group { display: flex; flex-direction: column; }
+  .form-label { font-size: 11px; font-weight: 500; color: var(--ink-3); margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.04em; }
+
+  .form-input, .form-select {
+    width: 100%; padding: 8px 10px; font-size: 14px; font-family: inherit;
+    border: 1px solid var(--border-strong); border-radius: 6px; background: var(--white);
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .form-input:focus, .form-select:focus {
+    outline: none; border-color: var(--blue-mid); box-shadow: 0 0 0 2px rgba(61,123,232,0.1);
+  }
+  .form-input.currency { font-family: 'DM Mono', monospace; }
+
+  .input-with-suffix { display: flex; align-items: center; gap: 4px; }
+  .input-with-suffix .form-input { flex: 1; }
+  .input-suffix { font-size: 13px; color: var(--ink-4); white-space: nowrap; }
+
+  .toggle-group { display: inline-flex; gap: 2px; background: var(--surface-2); border-radius: 5px; padding: 2px; }
+  .toggle-btn { padding: 4px 10px; font-size: 12px; font-weight: 500; border: none; background: none; border-radius: 4px; cursor: pointer; color: var(--ink-3); transition: all 0.15s; }
+  .toggle-btn.active { background: var(--white); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,0.06); }
+
+  .checkbox-inline { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ink-2); cursor: pointer; }
+  .checkbox-inline input { width: 16px; height: 16px; accent-color: var(--gold-mid); cursor: pointer; }
+
+  .lump-section { background: var(--gold-light); border: 1px solid rgba(196,154,0,0.25); border-radius: var(--radius); padding: 1rem; margin-top: 0.75rem; display: none; }
+  .lump-section.show { display: block; }
+  .lump-section .input-grid { gap: 10px 14px; }
+  .lump-hint { font-size: 12px; color: var(--gold); margin-top: 8px; line-height: 1.5; }
+
+  /* Slider grid */
+  .slider-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px 32px; margin-bottom: 16px; }
+  @media (max-width: 700px) { .slider-grid { grid-template-columns: 1fr; } }
+
+  .slider-group { display: flex; flex-direction: column; gap: 6px; position: relative; }
+
+  .slider-header { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .slider-value { width: 110px; text-align: right; font-family: 'DM Mono', monospace; font-size: 14px; }
+  .slider-value-row { display: flex; align-items: center; gap: 6px; }
+
+  .slider {
+    -webkit-appearance: none; appearance: none; width: 100%; height: 6px;
+    background: var(--surface-3); border-radius: 3px; outline: none;
+  }
+  .slider::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none; width: 20px; height: 20px;
+    background: var(--ink); border-radius: 50%; cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    transition: transform 0.1s, box-shadow 0.1s;
+  }
+  .slider::-webkit-slider-thumb:hover { transform: scale(1.1); box-shadow: 0 3px 8px rgba(0,0,0,0.2); }
+  .slider::-webkit-slider-thumb:active { transform: scale(0.95); }
+  .slider::-moz-range-thumb {
+    width: 20px; height: 20px; background: var(--ink); border-radius: 50%;
+    cursor: pointer; border: none; box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  }
+
+  .slider-range { display: flex; justify-content: space-between; font-size: 10px; color: var(--ink-4); margin-top: -2px; }
+  .slider-hint { font-size: 11px; color: var(--ink-4); font-style: italic; margin-top: 2px; }
+
+  /* Secondary inputs row */
+  .secondary-inputs { display: flex; flex-wrap: wrap; gap: 12px 20px; padding-top: 16px; border-top: 1px solid var(--border); }
+
+  /* Results */
+  .results-section { margin-top: 0.5rem; }
+
+  /* Before/After comparison */
+  .comparison-container { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem; }
+  @media (max-width: 700px) { .comparison-container { grid-template-columns: 1fr; } }
+
+  .comparison-card { border-radius: var(--radius-lg); padding: 1.25rem; }
+  .comparison-card.before { background: var(--surface-2); border: 1px solid var(--border); }
+  .comparison-card.after { background: var(--teal-light); border: 1px solid rgba(31,168,127,0.3); }
+
+  .comparison-header { display: flex; align-items: center; gap: 8px; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid rgba(0,0,0,0.08); }
+  .comparison-icon { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+  .comparison-card.before .comparison-icon { background: var(--ink); color: var(--white); }
+  .comparison-card.after .comparison-icon { background: var(--teal); color: var(--white); }
+  .comparison-title { font-family: 'DM Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; }
+  .comparison-card.before .comparison-title { color: var(--ink-3); }
+  .comparison-card.after .comparison-title { color: var(--teal); }
+  .comparison-subtitle { font-size: 12px; color: var(--ink-4); }
+  .comparison-card.after .comparison-subtitle { color: var(--teal); opacity: 0.7; }
+
+  .comparison-row { display: flex; justify-content: space-between; align-items: baseline; padding: 6px 0; font-size: 14px; }
+  .comparison-row .label { color: var(--ink-3); }
+  .comparison-card.after .comparison-row .label { color: var(--teal); opacity: 0.8; }
+  .comparison-row .value { font-weight: 600; font-family: 'DM Mono', monospace; font-size: 14px; }
+  .comparison-card.after .comparison-row .value { color: var(--teal); }
+
+  .comparison-row.primary { padding: 10px 0; margin: 4px 0; border-radius: 6px; }
+  .comparison-card.before .comparison-row.primary { background: rgba(0,0,0,0.04); margin: 4px -8px; padding: 10px 8px; }
+  .comparison-card.after .comparison-row.primary { background: rgba(14,110,85,0.15); margin: 4px -8px; padding: 10px 8px; }
+  .comparison-row.primary .label { font-weight: 500; }
+  .comparison-row.primary .value { font-size: 20px; }
+
+  .comparison-row.highlight { color: var(--coral); }
+  .comparison-row.highlight .label, .comparison-row.highlight .value { color: var(--coral); }
+
+  .savings-badge { display: inline-flex; align-items: center; gap: 4px; background: var(--teal); color: var(--white); padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; margin-top: 8px; }
+  .pmi-removed { display: inline-block; background: var(--teal); color: var(--white); font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 4px; margin-left: 6px; text-transform: uppercase; letter-spacing: 0.03em; }
+
+  /* Simple metrics for non-lump-sum view */
+  .metrics-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin-bottom: 1rem; }
+  .metric { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.75rem 0.875rem; }
+  .metric-label { font-size: 11px; color: var(--ink-4); text-transform: uppercase; letter-spacing: 0.05em; font-family: 'DM Mono', monospace; margin-bottom: 2px; }
+  .metric-value { font-size: 20px; font-weight: 500; color: var(--ink); line-height: 1.2; }
+  .metric-sub { font-size: 12px; color: var(--ink-3); margin-top: 2px; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  @media (max-width: 650px) { .two-col { grid-template-columns: 1fr; } }
+
+  .breakdown { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .breakdown-title { font-size: 11px; font-family: 'DM Mono', monospace; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); padding: 0.6rem 0.875rem; border-bottom: 1px solid var(--border); background: var(--surface-2); }
+  .breakdown-row { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0.875rem; border-bottom: 1px solid var(--border); font-size: 13px; }
   .breakdown-row:last-child { border-bottom: none; }
-  .breakdown-row:hover { background: var(--surface); }
   .breakdown-row .row-label { color: var(--ink-2); }
-  .breakdown-row .row-value { font-weight: 500; font-family: 'DM Mono', monospace; font-size: 15px; }
+  .breakdown-row .row-value { font-weight: 500; font-family: 'DM Mono', monospace; font-size: 13px; }
   .breakdown-row.total { background: var(--surface-2); }
-  .breakdown-row.total .row-label { color: var(--ink); font-weight: 600; }
-  .breakdown-row.total .row-value { color: var(--ink); font-weight: 600; }
+  .breakdown-row.total .row-label, .breakdown-row.total .row-value { font-weight: 600; color: var(--ink); }
+  .breakdown-row.highlight { background: var(--gold-light); }
 
-  .income-bar-wrap { margin-bottom: 1.25rem; }
-  .income-bar-label { font-size: 15px; color: var(--ink-3); margin-bottom: 6px; display: flex; justify-content: space-between; }
-  .income-bar-track { height: 8px; background: var(--surface-3); border-radius: 4px; overflow: hidden; }
-  .income-bar-fill { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
+  .income-bar-wrap { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.75rem 0.875rem; margin-bottom: 1rem; }
+  .income-bar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .income-bar-title { font-size: 13px; color: var(--ink-2); }
+  .income-bar-values { display: flex; gap: 16px; font-size: 13px; }
+  .income-bar-values span { display: flex; align-items: center; gap: 4px; }
+  .income-bar-track { height: 8px; background: var(--surface-3); border-radius: 4px; overflow: hidden; position: relative; }
+  .income-bar-fill { height: 100%; border-radius: 4px; position: absolute; left: 0; top: 0; transition: width 0.4s ease; }
+  .income-bar-fill.before { background: var(--ink-4); z-index: 1; }
+  .income-bar-fill.after { background: var(--teal-mid); z-index: 2; }
+  .income-bar-marker { position: absolute; top: -4px; width: 2px; height: 16px; background: var(--coral); z-index: 3; }
+  .income-bar-legend { display: flex; gap: 16px; margin-top: 6px; font-size: 11px; color: var(--ink-4); }
 
-  .callouts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1.25rem; }
-  @media (max-width: 600px) { .callouts { grid-template-columns: 1fr; } }
-  .callout { border-radius: var(--radius); padding: 1rem 1.125rem; font-size: 15px; line-height: 1.65; }
-  .callout-title { font-weight: 600; font-size: 14px; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; font-family: 'DM Mono', monospace; }
-  .callout.watch { background: var(--amber-light); color: var(--amber); border: 1px solid rgba(212,138,0,0.2); }
-  .callout.watch .callout-title { color: var(--amber); }
-  .callout.pro { background: var(--teal-light); color: var(--teal); border: 1px solid rgba(31,168,127,0.2); }
-  .callout.pro .callout-title { color: var(--teal); }
-  .callout.risk { background: var(--coral-light); color: var(--coral); border: 1px solid rgba(214,58,31,0.2); }
-  .callout.risk .callout-title { color: var(--coral); }
-  .callout.info { background: var(--blue-light); color: var(--blue); border: 1px solid rgba(61,123,232,0.2); }
-  .callout.info .callout-title { color: var(--blue); }
-  .callout.note { background: var(--purple-light); color: var(--purple); border: 1px solid rgba(107,92,231,0.2); }
-  .callout.note .callout-title { color: var(--purple); }
-  .callout.gold { background: var(--gold-light); color: var(--gold); border: 1px solid rgba(196,154,0,0.25); }
-  .callout.gold .callout-title { color: var(--gold); }
+  .chart-section { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1rem; margin-bottom: 1rem; }
+  .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 8px; }
+  .chart-title { font-family: 'DM Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-3); }
+  .chart-legend { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 10px; }
+  .chart-legend span { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--ink-2); }
+  .swatch { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+  .chart-wrap { position: relative; width: 100%; height: 220px; }
 
-  .burndown-section { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1.25rem; }
-  .burndown-title { font-family: 'DM Mono', monospace; font-size: 14px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-3); margin-bottom: 0.875rem; }
-  .burndown-legend { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 14px; }
-  .burndown-legend span { display: flex; align-items: center; gap: 6px; font-size: 14px; color: var(--ink-2); }
-  .swatch { width: 12px; height: 12px; border-radius: 2px; display: inline-block; flex-shrink: 0; }
-  .chart-wrap { position: relative; width: 100%; }
-
-  .compare-strip { background: var(--ink); color: var(--white); border-radius: var(--radius-lg); padding: 1.25rem 1.5rem; margin-bottom: 1.25rem; display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; }
-  .compare-item { text-align: center; flex: 1; min-width: 100px; }
-  .compare-label { font-size: 14px; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.4); font-family: 'DM Mono', monospace; margin-bottom: 4px; }
-  .compare-val { font-family: 'DM Serif Display', serif; font-size: 26px; font-weight: 400; color: var(--white); }
-  .compare-sub { font-size: 14px; color: rgba(255,255,255,0.4); margin-top: 3px; }
-  .compare-divider { width: 1px; background: rgba(255,255,255,0.12); align-self: stretch; min-height: 40px; }
-
-  .lump-tag { display: inline-flex; align-items: center; gap: 6px; background: var(--gold-light); color: var(--gold); border: 1px solid rgba(196,154,0,0.3); border-radius: 20px; padding: 5px 14px; font-size: 15px; font-weight: 500; margin-bottom: 1rem; }
-
-  .heloc-flow { display: flex; align-items: center; gap: 0; margin-bottom: 1.25rem; overflow-x: auto; }
-  .flow-step { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.875rem 1rem; font-size: 14px; min-width: 140px; flex-shrink: 0; text-align: center; transition: border-color 0.15s, box-shadow 0.15s; }
-  .flow-step:hover { border-color: var(--border-strong); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-  .flow-step-icon { font-size: 22px; margin-bottom: 4px; }
-  .flow-step-label { font-weight: 500; font-size: 14px; color: var(--ink); }
-  .flow-step-sub { font-size: 14px; color: var(--ink-3); margin-top: 3px; }
-  .flow-arrow { color: var(--ink-4); font-size: 18px; padding: 0 5px; flex-shrink: 0; }
-
-  .fha-note { background: var(--purple-light); border: 1px solid rgba(107,92,231,0.2); border-radius: var(--radius); padding: 0.9rem 1.125rem; font-size: 15px; color: var(--purple); margin-bottom: 1.25rem; }
-  .footer-note { font-size: 14px; color: var(--ink-4); border-top: 1px solid var(--border); padding-top: 1rem; margin-top: 0.5rem; line-height: 1.7; }
+  .callout { border-radius: var(--radius); padding: 0.75rem 1rem; font-size: 13px; line-height: 1.5; margin-bottom: 1rem; }
+  .callout-title { font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 3px; font-family: 'DM Mono', monospace; }
+  .callout.warning { background: var(--amber-light); color: var(--amber); border: 1px solid rgba(212,138,0,0.2); }
 
   .status-green { color: var(--teal-mid); }
   .status-amber { color: var(--amber-mid); }
   .status-red { color: var(--coral-mid); }
 
   @media (max-width: 600px) {
-    .header { padding: 2rem 1.25rem 1.75rem; }
-    .slider-bar { padding: 1rem 1.25rem; }
-    .tabs-wrap { padding: 1.25rem 1.25rem 0; }
-    .content { padding: 1.5rem 1.25rem; }
-    .metrics { grid-template-columns: repeat(2, 1fr); }
-    .compare-strip { gap: 0.75rem; }
+    .header { padding: 1.25rem 1rem; }
+    .main { padding: 1rem; }
+    .input-grid { grid-template-columns: 1fr 1fr; }
+    .metrics-row { grid-template-columns: repeat(2, 1fr); }
   }
 </style>
 </head>
@@ -142,563 +212,706 @@
 
 <div class="header">
   <div class="header-inner">
-    <p class="header-eyebrow">Home purchase planning — 2026</p>
-    <h1>Six ways to buy<br><em>the same house.</em></h1>
-    <p class="header-sub">An interactive breakdown of mortgage strategies including payoff burndown charts for each approach. Adjust the home price, then explore side by side.</p>
+    <h1>Home Buying Strategy Calculator</h1>
+    <p class="header-sub">Play out different scenarios before you talk to a lender. See how down payment size, lump-sum paydowns, and recasting can change your monthly payment and total interest.</p>
   </div>
 </div>
 
-<div class="slider-bar">
-  <div class="slider-inner">
-    <span class="slider-label">Home price</span>
-    <div class="slider-track">
-      <div style="flex:1;">
-        <input type="range" id="priceSlider" min="600000" max="900000" step="50000" value="850000">
-        <div class="slider-ticks">
-          <span>$600K</span><span>$650K</span><span>$700K</span><span>$750K</span><span>$800K</span><span>$850K</span><span>$900K</span>
+<div class="main">
+  <!-- Primary Controls with Sliders -->
+  <div class="input-section">
+    <div class="input-section-title">Find Your Number</div>
+
+    <div class="slider-grid">
+      <div class="slider-group">
+        <div class="slider-header">
+          <label class="form-label">Home Price</label>
+          <input type="text" class="form-input currency slider-value" id="homePrice" value="$650,000">
+        </div>
+        <input type="range" class="slider" id="homePriceSlider" min="100000" max="1500000" step="5000" value="650000">
+        <div class="slider-range"><span>$100K</span><span>$1.5M</span></div>
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-header">
+          <label class="form-label">Down Payment</label>
+          <div class="slider-value-row">
+            <input type="text" class="form-input slider-value" id="downPayment" value="5" style="width: 50px;">
+            <div class="toggle-group">
+              <button class="toggle-btn active" data-mode="percent" onclick="setDownMode('percent')">%</button>
+              <button class="toggle-btn" data-mode="dollar" onclick="setDownMode('dollar')">$</button>
+            </div>
+            <span class="field-hint" id="downDisplay">= $32,500</span>
+          </div>
+        </div>
+        <input type="range" class="slider" id="downPaymentSlider" min="0" max="50" step="0.5" value="5">
+        <div class="slider-range"><span>0%</span><span>50%</span></div>
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-header">
+          <label class="form-label">Monthly Payment</label>
+          <input type="text" class="form-input currency slider-value" id="targetMonthly" value="$5,300">
+        </div>
+        <input type="range" class="slider" id="monthlySlider" min="1000" max="10000" step="50" value="5300">
+        <div class="slider-range"><span>$1,000</span><span>$10,000</span></div>
+        <div class="slider-hint">Slide to find home price for your budget</div>
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-header">
+          <label class="form-label">Interest Rate</label>
+          <div class="slider-value-row">
+            <input type="text" class="form-input slider-value" id="interestRate" value="7.25" style="width: 55px;">
+            <span class="input-suffix">%</span>
+          </div>
+        </div>
+        <input type="range" class="slider" id="rateSlider" min="4" max="10" step="0.125" value="7.25">
+        <div class="slider-range"><span>4%</span><span>10%</span></div>
+      </div>
+    </div>
+
+    <div class="secondary-inputs">
+      <div class="form-group">
+        <label class="form-label">Term</label>
+        <select class="form-select" id="loanTerm">
+          <option value="360">30 years</option>
+          <option value="180">15 years</option>
+          <option value="240">20 years</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Type</label>
+        <select class="form-select" id="loanType">
+          <option value="conventional">Conventional</option>
+          <option value="fha">FHA</option>
+          <option value="va">VA</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tax</label>
+        <div class="input-with-suffix">
+          <input type="text" class="form-input" id="taxRate" value="1.2" style="width: 50px;">
+          <span class="input-suffix">%/yr</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Insurance</label>
+        <div class="input-with-suffix">
+          <input type="text" class="form-input currency" id="insurance" value="$180" style="width: 65px;">
+          <span class="input-suffix">/mo</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">HOA</label>
+        <div class="input-with-suffix">
+          <input type="text" class="form-input currency" id="hoa" value="$0" style="width: 55px;">
+          <span class="input-suffix">/mo</span>
         </div>
       </div>
     </div>
-    <div class="price-display" id="priceDisplay">$850,000</div>
   </div>
-</div>
 
-<div class="tabs-wrap">
-  <div class="tabs">
-    <button class="tab-btn active" data-tab="conv20">20% Down</button>
-    <button class="tab-btn" data-tab="buydown">20% + Buydown</button>
-    <button class="tab-btn" data-tab="conv25">25% Down</button>
-    <button class="tab-btn" data-tab="fha">FHA 3.5%</button>
-    <button class="tab-btn" data-tab="fhalump">FHA + $150K Lump</button>
-    <button class="tab-btn" data-tab="heloc">HELOC</button>
-  </div>
-</div>
-
-<div class="content">
-
-  <div class="panel active" id="panel-conv20">
-    <div class="scenario-header">
-      <p class="scenario-eyebrow" style="color:var(--blue-mid)">Scenario 1 — Conventional</p>
-      <h2>20% Down Payment</h2>
-      <p>The straightforward baseline. Put 20% down, avoid PMI, lock a 30-year fixed rate. Predictable, widely available, and keeps a modest cash cushion.</p>
-    </div>
-    <div class="metrics" id="m-conv20"></div>
-    <div class="breakdown" id="bd-conv20"></div>
-    <div class="income-bar-wrap" id="ib-conv20"></div>
-    <div class="burndown-section">
-      <div class="burndown-title">Payoff burndown — balance, equity &amp; cumulative interest</div>
-      <div class="burndown-legend">
-        <span><span class="swatch" style="background:#3d7be8"></span>Remaining balance</span>
-        <span><span class="swatch" style="background:#1fa87f"></span>Equity built</span>
-        <span><span class="swatch" style="background:#e34948"></span>Cumulative interest paid</span>
+  <!-- Your Finances -->
+  <div class="input-section">
+    <div class="input-section-title">Your Finances</div>
+    <div class="input-grid">
+      <div class="form-group">
+        <label class="form-label">Cash on Hand</label>
+        <input type="text" class="form-input currency" id="cashAvailable" value="$200,000">
       </div>
-      <div class="chart-wrap" style="height:260px"><canvas id="chart-conv20"></canvas></div>
-    </div>
-    <div class="callouts">
-      <div class="callout pro"><div class="callout-title">Why this works</div>20% eliminates PMI, saving $200–400/month vs lower down scenarios. Fixed rate means your payment never changes regardless of what the Fed does. Most lenders offer it and qualifying is straightforward.</div>
-      <div class="callout watch"><div class="callout-title">Watch out for</div>At $850K, 20% is $170K — nearly all your cash. After closing costs (~$17K) you'd have roughly $13K left. That's a thin emergency fund heading into homeownership with a baby on the way.</div>
-      <div class="callout info"><div class="callout-title">Good if...</div>Your wife returns to work within 12–18 months, you have savings not counted here, or you're comfortable running lean in year one. Simplest option to execute.</div>
-      <div class="callout risk"><div class="callout-title">Real risk</div>Any major unexpected expense — HVAC, roof, medical — in year one hits while cash is nearly zero. New homeowners typically spend $5K–15K in the first year on things they didn't anticipate.</div>
-    </div>
-    <p class="footer-note">Assumes 6.5% fixed, 30-year term, 1.2% property tax, $180/mo homeowners insurance. Net income $8,800/mo. Available cash ~$200K.</p>
-  </div>
 
-  <div class="panel" id="panel-buydown">
-    <div class="scenario-header">
-      <p class="scenario-eyebrow" style="color:var(--amber-mid)">Scenario 2 — Rate Buydown</p>
-      <h2>20% Down + 1 Point</h2>
-      <p>Same down payment as the baseline, but pay one point upfront (1% of loan) to buy the rate down ~0.25%. Costs more at closing but reduces your payment for the life of the loan.</p>
-    </div>
-    <div class="metrics" id="m-buydown"></div>
-    <div class="breakdown" id="bd-buydown"></div>
-    <div class="income-bar-wrap" id="ib-buydown"></div>
-    <div class="burndown-section">
-      <div class="burndown-title">Payoff burndown — balance, equity &amp; cumulative interest</div>
-      <div class="burndown-legend">
-        <span><span class="swatch" style="background:#3d7be8"></span>Remaining balance</span>
-        <span><span class="swatch" style="background:#1fa87f"></span>Equity built</span>
-        <span><span class="swatch" style="background:#e34948"></span>Cumulative interest paid</span>
+      <div class="form-group">
+        <label class="form-label">Monthly Net Income</label>
+        <div class="input-with-suffix">
+          <input type="text" class="form-input currency" id="monthlyIncome" value="$9,800" style="width: 100px;">
+          <span class="input-suffix">/mo</span>
+        </div>
       </div>
-      <div class="chart-wrap" style="height:260px"><canvas id="chart-buydown"></canvas></div>
-    </div>
-    <div class="callouts">
-      <div class="callout pro"><div class="callout-title">Why this works</div>Lower payment for the full 30 years. If you stay 5+ years, the upfront cost pays off and every month after break-even is pure savings. Total interest paid over the life of the loan is meaningfully lower.</div>
-      <div class="callout watch"><div class="callout-title">The break-even problem</div>One point saves ~$100–115/month but costs $6,800+ upfront. Break-even is year 4–5. If you refinance before then because rates drop, you lose that money entirely.</div>
-      <div class="callout info"><div class="callout-title">Good if...</div>You plan to stay 7–10+ years and don't expect to refinance soon. Works best when current rates are near a local peak.</div>
-      <div class="callout risk"><div class="callout-title">Real risk</div>Leaves even less cash after closing than the baseline — roughly $6K. Almost no cushion for unexpected expenses in year one.</div>
-    </div>
-    <p class="footer-note">Assumes 6.25% rate after 1-point buydown. All other assumptions same as Scenario 1.</p>
-  </div>
 
-  <div class="panel" id="panel-conv25">
-    <div class="scenario-header">
-      <p class="scenario-eyebrow" style="color:var(--teal-mid)">Scenario 3 — More Equity</p>
-      <h2>25% Down Payment</h2>
-      <p>Larger down payment means smaller loan and lower payment. Reaching 25% on an $850K home requires ~$212.5K — meaning the $50K retirement loan fills the gap between your cash and the target.</p>
-    </div>
-    <div class="metrics" id="m-conv25"></div>
-    <div class="breakdown" id="bd-conv25"></div>
-    <div class="income-bar-wrap" id="ib-conv25"></div>
-    <div class="burndown-section">
-      <div class="burndown-title">Payoff burndown — balance, equity &amp; cumulative interest</div>
-      <div class="burndown-legend">
-        <span><span class="swatch" style="background:#3d7be8"></span>Remaining balance</span>
-        <span><span class="swatch" style="background:#1fa87f"></span>Equity built</span>
-        <span><span class="swatch" style="background:#e34948"></span>Cumulative interest paid</span>
+      <div class="form-group" style="grid-column: span 2;">
+        <label class="checkbox-inline">
+          <input type="checkbox" id="hasLumpSum" checked>
+          <span>I plan to make a lump-sum payment after closing</span>
+        </label>
       </div>
-      <div class="chart-wrap" style="height:260px"><canvas id="chart-conv25"></canvas></div>
     </div>
-    <div class="callouts">
-      <div class="callout pro"><div class="callout-title">Why this works</div>Lowest monthly P&I of the conventional options. More equity from day one means hitting refinance thresholds sooner if rates drop. Some lenders offer slightly better rates at 25%+ LTV.</div>
-      <div class="callout risk"><div class="callout-title">The retirement loan problem</div>Repaying a 401(k) loan uses after-tax dollars while losing years of compound growth. If you leave your job the balance may become due immediately — real risk with variable income and a growing family.</div>
-      <div class="callout watch"><div class="callout-title">Watch out for</div>The retirement loan adds $400–600/month in repayment on top of the mortgage. You lower one payment but add another. Net relief is smaller than the headline number suggests.</div>
-      <div class="callout info"><div class="callout-title">Good if...</div>Your job is very stable, you're certain you won't leave in the next 5 years, and the lower mortgage payment materially changes your cash flow picture.</div>
-    </div>
-    <p class="footer-note">Retirement loan repayment (~$450–600/mo) not included in monthly total shown. Add that to get the real number.</p>
-  </div>
 
-  <div class="panel" id="panel-fha">
-    <div class="scenario-header">
-      <p class="scenario-eyebrow" style="color:var(--coral-mid)">Scenario 4 — FHA Loan</p>
-      <h2>FHA 3.5% Down</h2>
-      <p>Because your wife hasn't owned a home in 3+ years, she qualifies as a first-time buyer under FHA rules — making you jointly eligible. Minimal down payment keeps most cash liquid, but mortgage insurance adds to the monthly cost.</p>
-    </div>
-    <div class="fha-note">⚠ FHA loan limits vary by county. Most high-cost metros allow up to ~$1.15M in 2026 — confirm your specific county before proceeding.</div>
-    <div class="metrics" id="m-fha"></div>
-    <div class="breakdown" id="bd-fha"></div>
-    <div class="income-bar-wrap" id="ib-fha"></div>
-    <div class="burndown-section">
-      <div class="burndown-title">Payoff burndown — balance, equity &amp; cumulative interest</div>
-      <div class="burndown-legend">
-        <span><span class="swatch" style="background:#3d7be8"></span>Remaining balance</span>
-        <span><span class="swatch" style="background:#1fa87f"></span>Equity built</span>
-        <span><span class="swatch" style="background:#e34948"></span>Cumulative interest paid</span>
+    <div class="lump-section show" id="lumpSection">
+      <div class="input-grid">
+        <div class="form-group">
+          <label class="form-label">Lump Sum Amount</label>
+          <input type="text" class="form-input currency" id="lumpAmount" value="$100,000">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Apply at Month</label>
+          <input type="number" class="form-input" id="lumpMonth" value="2" min="1" max="360" style="width: 70px;">
+        </div>
+
+        <div class="form-group">
+          <label class="checkbox-inline">
+            <input type="checkbox" id="doRecast" checked>
+            <span>Request recast (lower monthly payment)</span>
+          </label>
+        </div>
       </div>
-      <div class="chart-wrap" style="height:260px"><canvas id="chart-fha"></canvas></div>
+      <p class="lump-hint">The lender qualifies you on the larger payment. After closing, pay down the principal and request a recast to lower your monthly payment.</p>
     </div>
-    <div class="callouts">
-      <div class="callout pro"><div class="callout-title">Why this works</div>Preserves ~$170K in cash after closing — a massive liquidity advantage heading into new homeownership and parenthood. Slightly lower rate than conventional. Easier to qualify with lower credit requirements.</div>
-      <div class="callout risk"><div class="callout-title">The MIP trap</div>FHA mortgage insurance cannot be removed by reaching 20% equity. Unlike PMI, you're stuck with it until you refinance into a conventional loan ($3–6K in closing costs). Plan that refinance for year 3–5.</div>
-      <div class="callout watch"><div class="callout-title">Watch out for</div>An upfront MIP fee (1.75% of loan) is added to your loan balance at closing, increasing total debt. Monthly MIP adds $300–400/mo on top of P&I, making total monthly cost higher than the 20% conventional despite the lower rate.</div>
-      <div class="callout info"><div class="callout-title">Best exit strategy</div>After 3–5 years of payments and home appreciation, refinance into a conventional loan once you've reached 20% equity. Drop the MIP and potentially capture a better rate if the market cooperates.</div>
-    </div>
-    <p class="footer-note">FHA rate at 6.25%. Upfront MIP = 1.75% of base loan added to balance. Annual MIP = 0.55%, paid monthly. Wife's first-time buyer status under FHA's 3-year rule makes you jointly eligible.</p>
   </div>
 
-  <div class="panel" id="panel-fhalump">
-    <div class="scenario-header">
-      <p class="scenario-eyebrow" style="color:var(--gold-mid)">Scenario 5 — FHA + Lump Sum</p>
-      <h2>FHA 3.5% + $150K Principal Payment</h2>
-      <p>Start with the low FHA down payment to preserve cash and closing flexibility, then make a $150,000 lump-sum principal payment shortly after closing. This dramatically reduces the balance, total interest, and payoff timeline — while giving you liquidity during the critical transition period.</p>
-    </div>
-    <div class="lump-tag">⚡ $150,000 principal payment applied at month 3</div>
-    <div class="fha-note">⚠ Confirm with your lender that there is no prepayment penalty on the FHA loan before closing. Most FHA loans have none, but verify.</div>
-    <div class="metrics" id="m-fhalump"></div>
-    <div class="breakdown" id="bd-fhalump"></div>
-    <div class="income-bar-wrap" id="ib-fhalump"></div>
-    <div class="burndown-section">
-      <div class="burndown-title">Payoff burndown — the lump sum cliff is visible at month 3</div>
-      <div class="burndown-legend">
-        <span><span class="swatch" style="background:#3d7be8"></span>Remaining balance</span>
-        <span><span class="swatch" style="background:#1fa87f"></span>Equity built</span>
-        <span><span class="swatch" style="background:#e34948"></span>Cumulative interest paid</span>
-      </div>
-      <div class="chart-wrap" style="height:260px"><canvas id="chart-fhalump"></canvas></div>
-    </div>
-    <div class="callouts">
-      <div class="callout gold"><div class="callout-title">The core insight</div>By keeping cash liquid at closing, you have full flexibility on timing. If you close in month 1 and drop $150K in month 3, you've only paid ~2 months of interest on that extra capital — a small cost for the option value of having liquidity during the move and transition period.</div>
-      <div class="callout pro"><div class="callout-title">Why this beats just putting it down</div>Putting $150K down at closing vs applying it as a lump sum after saves almost the same total interest, but the FHA route keeps you liquid during the highest-risk period — the first 90 days of homeownership with a newborn and settling-in costs.</div>
-      <div class="callout watch"><div class="callout-title">The MIP complication</div>Even after the lump sum dramatically reduces your balance and you may have 20%+ equity, FHA MIP doesn't auto-cancel. You still need to refinance into a conventional loan to remove it. The good news: the lump sum accelerates when you hit that equity threshold.</div>
-      <div class="callout info"><div class="callout-title">Refinance trigger</div>After the lump sum, track your equity closely. Once you hit 20% LTV (accounting for any appreciation), refinance into a conventional loan to drop the MIP. At that point your payment drops and you're on a clean conventional structure. That refi could happen within 1–2 years at this equity level.</div>
-      <div class="callout risk"><div class="callout-title">What you're giving up</div>$150K deployed into the house is $150K not invested elsewhere. At a 7% historical average return, that capital could grow to ~$161K in one year. The interest you save on the mortgage has to be weighed against what that cash could earn — especially if your mortgage rate is below your investment return.</div>
-      <div class="callout note" style="grid-column:1/-1"><div class="callout-title">The honest verdict</div>This is arguably the most strategically flexible option in the set. You get FHA's low barrier to entry, preserve liquidity during the highest-risk window, then deploy capital deliberately after closing when you have a clearer picture of your actual cash needs. The main risk is discipline — if the $150K gets spent during the transition period instead of hitting the principal, the strategy collapses.</div>
-    </div>
-    <p class="footer-note">Lump sum applied at month 3. FHA rate 6.25%. Upfront MIP 1.75% added to balance. Monthly MIP 0.55%. After lump sum, monthly payment remains the same — extra principal payment accelerates payoff without changing your required minimum.</p>
-  </div>
-
-  <div class="panel" id="panel-heloc">
-    <div class="scenario-header">
-      <p class="scenario-eyebrow" style="color:var(--purple-mid)">Scenario 6 — Advanced Strategy</p>
-      <h2>First-Lien HELOC</h2>
-      <p>Your paycheck deposits directly into the HELOC account. Interest accrues on daily balance rather than a fixed schedule, so every dollar parked in the account reduces interest cost. You draw from it throughout the month for expenses.</p>
-    </div>
-    <div class="heloc-flow">
-      <div class="flow-step"><div class="flow-step-icon">💰</div><div class="flow-step-label">Paycheck in</div><div class="flow-step-sub">$8,800/mo deposits</div></div>
-      <div class="flow-arrow">→</div>
-      <div class="flow-step"><div class="flow-step-icon">📉</div><div class="flow-step-label">Balance drops</div><div class="flow-step-sub">Less daily interest</div></div>
-      <div class="flow-arrow">→</div>
-      <div class="flow-step"><div class="flow-step-icon">🛒</div><div class="flow-step-label">Spend from credit</div><div class="flow-step-sub">Draw for expenses</div></div>
-      <div class="flow-arrow">→</div>
-      <div class="flow-step"><div class="flow-step-icon">⚡</div><div class="flow-step-label">Surplus attacks</div><div class="flow-step-sub">Faster payoff</div></div>
-    </div>
-    <div class="compare-strip" id="heloc-strip"></div>
-    <div class="metrics" id="m-heloc"></div>
-    <div class="breakdown" id="bd-heloc"></div>
-    <div class="income-bar-wrap" id="ib-heloc"></div>
-    <div class="burndown-section">
-      <div class="burndown-title">Payoff burndown — HELOC base (8.5%) vs stress (10%) vs conventional</div>
-      <div class="burndown-legend">
-        <span><span class="swatch" style="background:#6b5ce7"></span>HELOC balance (8.5%)</span>
-        <span><span class="swatch" style="background:#e34948"></span>HELOC balance (10% stress)</span>
-        <span><span class="swatch" style="background:#3d7be8"></span>Conventional 6.5% (reference)</span>
-        <span><span class="swatch" style="background:#1fa87f"></span>HELOC equity built</span>
-      </div>
-      <div class="chart-wrap" style="height:280px"><canvas id="chart-heloc"></canvas></div>
-    </div>
-    <div class="callouts">
-      <div class="callout pro"><div class="callout-title">Why this works</div>Daily balance compression rewards disciplined spenders. Every dollar of surplus parked in the account earns the equivalent of your HELOC rate — currently 8.5% — beating most savings accounts. Lump sums like bonuses immediately reduce interest.</div>
-      <div class="callout risk"><div class="callout-title">Rate risk is real</div>HELOCs track prime. Today that's 8.5% — already 2 full points above conventional. If prime rises to 10%, your interest cost climbs with no ceiling or fixed payment to plan around. Variable income plus a child makes this the highest-risk option.</div>
-      <div class="callout watch"><div class="callout-title">Discipline is the product</div>This strategy only beats conventional if you spend less than you earn every month. The HELOC uses your home's equity as a credit line — overspending doesn't just drain a bank account, it draws against your house.</div>
-      <div class="callout info"><div class="callout-title">Where to find it</div>True first-lien HELOCs aren't widely available. CMG Financial's "All-In-One" loan is the most common product. Some credit unions offer similar structures. Underwriting tends to be stricter than conventional mortgages.</div>
-    </div>
-    <p class="footer-note">HELOC rate at prime 8.5%. Stress scenario at 10%. Surplus ~$7,400/mo before housing draws. Payoff modeled using average daily balance compression. Monthly living expenses drawn from HELOC throughout month.</p>
-  </div>
-
+  <!-- Results -->
+  <div class="results-section" id="results"></div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
-const NET = 8800, EXPENSES = 1400, CASH = 200000;
-const CONV_RATE = 0.065, BUYDOWN_RATE = 0.0625, FHA_RATE = 0.0625;
-const HELOC_RATE = 0.085, HELOC_STRESS = 0.10;
-const TERM = 360, LUMP = 150000, LUMP_MONTH = 3;
+let downMode = 'percent';
+let chartInstance = null;
+let isUpdating = false; // Prevent circular updates
 
-let homePrice = 850000;
-const chartInstances = {};
+// Utilities
+function parseCurrency(str) {
+  if (!str) return 0;
+  return parseFloat(String(str).replace(/[^0-9.-]/g, '')) || 0;
+}
 
-function fmt(n) { return '$' + Math.round(n).toLocaleString(); }
-function fmtK(n) { return '$' + Math.round(n/1000) + 'K'; }
-function pmt(r, n, pv) { const m=r/12; return pv*m*Math.pow(1+m,n)/(Math.pow(1+m,n)-1); }
+function formatCurrency(n) {
+  return '$' + Math.round(n).toLocaleString();
+}
 
-function amortize(principal, annualRate, termMonths, extraPrincipalByMonth) {
+function formatCurrencyK(n) {
+  if (Math.abs(n) >= 1000) return '$' + Math.round(n / 1000) + 'K';
+  return formatCurrency(n);
+}
+
+function pmt(annualRate, termMonths, principal) {
   const r = annualRate / 12;
-  const payment = pmt(annualRate, termMonths, principal);
-  let bal = principal, totalInt = 0, totalPaid = 0;
-  const balArr=[bal], intArr=[0], equityArr=[0];
-  for (let m=1; m<=termMonths; m++) {
-    if (bal <= 0) { balArr.push(0); intArr.push(totalInt); equityArr.push(principal-0); break; }
+  if (r === 0) return principal / termMonths;
+  return principal * r * Math.pow(1 + r, termMonths) / (Math.pow(1 + r, termMonths) - 1);
+}
+
+// Form handling
+function setDownMode(mode) {
+  downMode = mode;
+  document.querySelectorAll('.down-payment-control .toggle-btn, .slider-value-row .toggle-btn').forEach(btn => {
+    if (btn.dataset.mode) btn.classList.toggle('active', btn.dataset.mode === mode);
+  });
+  updateDownDisplay();
+  recalculate();
+}
+
+function updateDownDisplay() {
+  const homePrice = parseCurrency(document.getElementById('homePrice').value);
+  const downVal = parseFloat(document.getElementById('downPayment').value) || 0;
+  const display = document.getElementById('downDisplay');
+
+  if (downMode === 'percent') {
+    const dollarAmt = homePrice * (downVal / 100);
+    display.textContent = `= ${formatCurrency(dollarAmt)}`;
+  } else {
+    const pct = homePrice > 0 ? ((downVal / homePrice) * 100).toFixed(1) : 0;
+    display.textContent = `= ${pct}%`;
+  }
+}
+
+function toggleLumpSum() {
+  const checked = document.getElementById('hasLumpSum').checked;
+  document.getElementById('lumpSection').classList.toggle('show', checked);
+  recalculate();
+}
+
+// Amortization
+function amortize(principal, annualRate, termMonths, lumpMonth, lumpAmount, doRecast) {
+  const r = annualRate / 100 / 12;
+  let payment = pmt(annualRate / 100, termMonths, principal);
+  let bal = principal, totalInt = 0;
+  const balArr = [bal], intArr = [0], equityArr = [0];
+  let recastPayment = null, balanceAtRecast = null;
+
+  for (let m = 1; m <= termMonths; m++) {
+    if (bal <= 0) { balArr.push(0); intArr.push(totalInt); equityArr.push(principal); continue; }
     const intMonth = bal * r;
     let prin = Math.min(payment - intMonth, bal);
-    if (extraPrincipalByMonth && extraPrincipalByMonth[m]) prin += extraPrincipalByMonth[m];
+
+    if (lumpMonth && lumpAmount && m === lumpMonth) {
+      prin += lumpAmount;
+      if (doRecast) {
+        const newBal = Math.max(0, bal - prin);
+        const remainingMonths = termMonths - m;
+        if (remainingMonths > 0 && newBal > 0) {
+          recastPayment = pmt(annualRate / 100, remainingMonths, newBal);
+          balanceAtRecast = newBal;
+          payment = recastPayment;
+        }
+      }
+    }
+
     totalInt += intMonth;
-    totalPaid += payment;
     bal = Math.max(0, bal - prin);
-    if (m % 12 === 0 || m === termMonths) {
-      balArr.push(Math.round(bal));
-      intArr.push(Math.round(totalInt));
-      equityArr.push(Math.round(principal - bal));
+    if (m % 12 === 0 || m === termMonths || bal === 0) {
+      balArr.push(Math.round(bal)); intArr.push(Math.round(totalInt)); equityArr.push(Math.round(principal - bal));
     }
   }
-  return { balArr, intArr, equityArr, totalInt: Math.round(totalInt), payment: Math.round(payment) };
+
+  return { payment: Math.round(pmt(annualRate / 100, termMonths, principal)), recastPayment: recastPayment ? Math.round(recastPayment) : null, balanceAtRecast, totalInt: Math.round(totalInt), balArr, intArr, equityArr };
 }
 
-function simulateHeloc(loanAmount, annualRate) {
-  const surplus = NET - EXPENSES;
-  const avgDailyReduction = surplus / 2;
-  let bal = loanAmount, totalInt = 0, mo = 0;
-  const balArr=[bal], intArr=[0], equityArr=[0];
-  while (bal > 0 && mo < 480) {
-    const eff = Math.max(0, bal - avgDailyReduction);
-    const intM = eff * (annualRate/12);
-    const prin = Math.max(0, surplus - intM);
-    totalInt += intM; bal = Math.max(0, bal - prin); mo++;
-    if (mo % 12 === 0) { balArr.push(Math.round(bal)); intArr.push(Math.round(totalInt)); equityArr.push(Math.round(loanAmount-bal)); }
+function amortizeOriginal(principal, annualRate, termMonths) {
+  const r = annualRate / 100 / 12;
+  const payment = pmt(annualRate / 100, termMonths, principal);
+  let bal = principal, totalInt = 0;
+  const balArr = [bal], intArr = [0], equityArr = [0];
+
+  for (let m = 1; m <= termMonths; m++) {
+    if (bal <= 0) { balArr.push(0); intArr.push(totalInt); equityArr.push(principal); continue; }
+    const intMonth = bal * r;
+    const prin = Math.min(payment - intMonth, bal);
+    totalInt += intMonth;
+    bal = Math.max(0, bal - prin);
+    if (m % 12 === 0 || m === termMonths || bal === 0) {
+      balArr.push(Math.round(bal)); intArr.push(Math.round(totalInt)); equityArr.push(Math.round(principal - bal));
+    }
   }
-  return { balArr, intArr, equityArr, totalInt: Math.round(totalInt), payoffMonths: mo };
+
+  return { payment: Math.round(payment), totalInt: Math.round(totalInt), balArr, intArr, equityArr };
 }
 
-function calc(price) {
-  const tax = Math.round(price*0.012/12), ins=180, closing=Math.round(price*0.02);
-  const scenarios = {};
+function calculate() {
+  const homePrice = parseCurrency(document.getElementById('homePrice').value);
+  const downVal = parseFloat(document.getElementById('downPayment').value) || 0;
+  const loanType = document.getElementById('loanType').value;
+  const interestRate = parseFloat(document.getElementById('interestRate').value) || 7.25;
+  const termMonths = parseInt(document.getElementById('loanTerm').value);
+  const taxRate = parseFloat(document.getElementById('taxRate').value) || 1.2;
+  const insurance = parseCurrency(document.getElementById('insurance').value);
+  const hoa = parseCurrency(document.getElementById('hoa').value);
+  const cashAvailable = parseCurrency(document.getElementById('cashAvailable').value);
+  const monthlyIncome = parseCurrency(document.getElementById('monthlyIncome').value);
+  const hasLumpSum = document.getElementById('hasLumpSum').checked;
+  const lumpAmount = hasLumpSum ? parseCurrency(document.getElementById('lumpAmount').value) : 0;
+  const lumpMonth = hasLumpSum ? parseInt(document.getElementById('lumpMonth').value) || 2 : 0;
+  const doRecast = hasLumpSum ? document.getElementById('doRecast').checked : false;
 
-  // 1. Conv 20%
-  (() => {
-    const down=Math.round(price*0.2), loan=price-down;
-    const a=amortize(loan, CONV_RATE, TERM, null);
-    scenarios.conv20={down,loan,pi:a.payment,total:a.payment+tax+ins,cashLeft:CASH-down-closing,tax,ins,closing,totalInt:a.totalInt,amort:a,pct:Math.round((a.payment+tax+ins)/NET*100)};
-  })();
+  const downPayment = downMode === 'dollar' ? downVal : homePrice * (downVal / 100);
+  const downPct = (downPayment / homePrice) * 100;
 
-  // 2. Buydown
-  (() => {
-    const down=Math.round(price*0.2), loan=price-down, pt=Math.round(loan*0.01);
-    const a=amortize(loan, BUYDOWN_RATE, TERM, null);
-    const baseline=Math.round(pmt(CONV_RATE,TERM,loan));
-    const savings=baseline-a.payment;
-    const be=Math.ceil(pt/savings);
-    scenarios.buydown={down,loan,pi:a.payment,point:pt,total:a.payment+tax+ins,cashLeft:CASH-down-closing-pt,tax,ins,closing,totalInt:a.totalInt,amort:a,breakeven:be,savings,pct:Math.round((a.payment+tax+ins)/NET*100)};
-  })();
+  let baseLoan = homePrice - downPayment;
+  let loan = baseLoan;
+  let upfrontMIP = 0, monthlyMIP = 0, fundingFee = 0, monthlyPMI = 0;
 
-  // 3. Conv 25%
-  (() => {
-    const down=Math.round(price*0.25), loan=price-down;
-    const retNeeded=Math.max(0,down-CASH+closing);
-    const a=amortize(loan, CONV_RATE, TERM, null);
-    scenarios.conv25={down,loan,pi:a.payment,total:a.payment+tax+ins,cashLeft:Math.max(0,CASH-down-closing),tax,ins,closing,totalInt:a.totalInt,amort:a,retNeeded,pct:Math.round((a.payment+tax+ins)/NET*100)};
-  })();
+  if (loanType === 'fha') {
+    upfrontMIP = baseLoan * 0.0175;
+    loan = baseLoan + upfrontMIP;
+    monthlyMIP = Math.round(baseLoan * 0.0055 / 12);
+  } else if (loanType === 'va') {
+    const feeRate = downPct >= 10 ? 0.0125 : downPct >= 5 ? 0.015 : 0.0215;
+    fundingFee = baseLoan * feeRate;
+    loan = baseLoan + fundingFee;
+  } else if (loanType === 'conventional' && downPct < 20) {
+    monthlyPMI = Math.round(loan * 0.005 / 12);
+  }
 
-  // 4. FHA 3.5%
-  (() => {
-    const down=Math.round(price*0.035), baseLoan=price-down;
-    const mipUp=Math.round(baseLoan*0.0175), loan=baseLoan+mipUp;
-    const mip=Math.round(baseLoan*0.0055/12);
-    const a=amortize(loan, FHA_RATE, TERM, null);
-    scenarios.fha={down,loan,baseLoan,mipUp,mip,pi:a.payment,total:a.payment+mip+tax+ins,cashLeft:CASH-down-closing,tax,ins,closing,totalInt:a.totalInt,amort:a,pct:Math.round((a.payment+mip+tax+ins)/NET*100)};
-  })();
+  const closingCosts = Math.round(homePrice * 0.02);
+  const monthlyTax = Math.round(homePrice * (taxRate / 100) / 12);
 
-  // 5. FHA + lump
-  (() => {
-    const down=Math.round(price*0.035), baseLoan=price-down;
-    const mipUp=Math.round(baseLoan*0.0175), loan=baseLoan+mipUp;
-    const mip=Math.round(baseLoan*0.0055/12);
-    const extra={[LUMP_MONTH]:LUMP};
-    const a=amortize(loan, FHA_RATE, TERM, extra);
-    const cashAfterClose=CASH-down-closing;
-    const cashAfterLump=cashAfterClose-LUMP;
-    scenarios.fhalump={down,loan,baseLoan,mipUp,mip,pi:a.payment,total:a.payment+mip+tax+ins,cashLeft:cashAfterClose,cashAfterLump,tax,ins,closing,totalInt:a.totalInt,amort:a,pct:Math.round((a.payment+mip+tax+ins)/NET*100)};
-  })();
+  const amort = amortize(loan, interestRate, termMonths, lumpMonth, lumpAmount, doRecast);
+  const amortOriginal = amortizeOriginal(loan, interestRate, termMonths);
 
-  // 6. HELOC
-  (() => {
-    const down=Math.round(price*0.2), loan=price-down;
-    const base=simulateHeloc(loan, HELOC_RATE);
-    const stress=simulateHeloc(loan, HELOC_STRESS);
-    const refBase=amortize(loan, CONV_RATE, TERM, null);
-    const effInt=Math.round((loan-(NET-EXPENSES)/2)*HELOC_RATE/12);
-    const total=effInt+tax+ins;
-    scenarios.heloc={down,loan,effInt,total,cashLeft:CASH-down-closing,tax,ins,closing,base,stress,refBase,surplus:NET-EXPENSES,pct:Math.round(total/NET*100)};
-  })();
+  // Check if lump sum brings equity to 20%+ (PMI can be removed)
+  let monthlyPMIAfter = monthlyPMI;
+  let pmiRemoved = false;
+  if (hasLumpSum && loanType === 'conventional' && monthlyPMI > 0) {
+    const equityAfterLump = downPayment + lumpAmount;
+    const ltvAfterLump = (homePrice - equityAfterLump) / homePrice;
+    if (ltvAfterLump <= 0.80) {
+      monthlyPMIAfter = 0;
+      pmiRemoved = true;
+    }
+  }
 
-  return {tax,ins,closing,scenarios};
+  const piPayment = amort.payment;
+  const extrasBefore = monthlyTax + insurance + hoa + monthlyMIP + monthlyPMI;
+  const extrasAfter = monthlyTax + insurance + hoa + monthlyMIP + monthlyPMIAfter;
+  const totalMonthlyBefore = piPayment + extrasBefore;
+  const totalMonthlyAfter = amort.recastPayment ? amort.recastPayment + extrasAfter : (pmiRemoved ? piPayment + extrasAfter : totalMonthlyBefore);
+
+  const cashToClose = downPayment + closingCosts;
+  const cashAfterClose = cashAvailable - cashToClose;
+  const cashAfterLump = hasLumpSum ? cashAfterClose - lumpAmount : cashAfterClose;
+
+  const housingRatioBefore = Math.round((totalMonthlyBefore / monthlyIncome) * 100);
+  const housingRatioAfter = Math.round((totalMonthlyAfter / monthlyIncome) * 100);
+
+  const interestSaved = amortOriginal.totalInt - amort.totalInt;
+
+  return {
+    homePrice, downPayment, downPct, baseLoan, loan, loanType, interestRate, termMonths,
+    upfrontMIP, monthlyMIP, fundingFee, monthlyPMI, monthlyPMIAfter, pmiRemoved,
+    closingCosts, monthlyTax, insurance, hoa, extrasBefore, extrasAfter,
+    piPayment, totalMonthlyBefore, totalMonthlyAfter,
+    recastPayment: amort.recastPayment,
+    balanceAtRecast: amort.balanceAtRecast,
+    cashToClose, cashAfterClose, cashAfterLump,
+    hasLumpSum, lumpAmount, lumpMonth, doRecast,
+    monthlyIncome, housingRatioBefore, housingRatioAfter,
+    totalInterest: amort.totalInt, originalTotalInterest: amortOriginal.totalInt,
+    interestSaved, amortization: amort, amortOriginal,
+    monthlySavings: totalMonthlyBefore - totalMonthlyAfter
+  };
 }
 
-function metricHTML(label,value,sub,cls) {
-  return `<div class="metric"><div class="metric-label">${label}</div><div class="metric-value ${cls||''}">${value}</div>${sub?`<div class="metric-sub">${sub}</div>`:''}</div>`;
-}
-function bdRow(label,value,cls) { return `<div class="breakdown-row ${cls||''}"><span class="row-label">${label}</span><span class="row-value">${value}</span></div>`; }
-function bdTable(title,rows,total) {
-  return `<div class="breakdown"><div class="breakdown-title">${title}</div>${rows.map(r=>bdRow(r.l,r.v,r.c||'')).join('')}<div class="breakdown-row total"><span class="row-label">${total.l}</span><span class="row-value">${total.v}</span></div></div>`;
-}
-function ibHTML(total,pct) {
-  const c=pct>65?'#d63a1f':pct>50?'#d48a00':'#1fa87f';
-  return `<div class="income-bar-wrap"><div class="income-bar-label"><span>Housing cost as % of $8,800 net income</span><span style="font-weight:600;color:${c}">${pct}%</span></div><div class="income-bar-track"><div class="income-bar-fill" style="width:${Math.min(pct,100)}%;background:${c}"></div></div><div style="font-size:14px;color:var(--ink-4);margin-top:5px;">Guideline: keep housing at or below 35–40% of net for your income level</div></div>`;
-}
-function cashCls(v) { return v<5000?'status-red':v<25000?'status-amber':'status-green'; }
-function pctCls(p) { return p>65?'status-red':p>50?'status-amber':'status-green'; }
+function render(r) {
+  let html = '';
 
-function mkChart(id, labels, datasets, yMin, totalInt) {
-  const existing = Chart.getChart(id);
-  if (existing) existing.destroy();
-  const ctx = document.getElementById(id);
+  if (r.hasLumpSum) {
+    // Before/After comparison view
+    html += `<div class="comparison-container">`;
+
+    // BEFORE card - What lender sees
+    html += `
+      <div class="comparison-card before">
+        <div class="comparison-header">
+          <div class="comparison-icon">🏦</div>
+          <div>
+            <div class="comparison-title">What the Lender Sees</div>
+            <div class="comparison-subtitle">They qualify you on this payment</div>
+          </div>
+        </div>
+        <div class="comparison-row"><span class="label">Home Price</span><span class="value">${formatCurrency(r.homePrice)}</span></div>
+        <div class="comparison-row"><span class="label">Down Payment</span><span class="value">${formatCurrency(r.downPayment)} (${r.downPct.toFixed(1)}%)</span></div>
+        <div class="comparison-row"><span class="label">Loan Amount</span><span class="value">${formatCurrency(r.loan)}</span></div>
+        <div class="comparison-row primary"><span class="label">Monthly P&I</span><span class="value">${formatCurrency(r.piPayment)}</span></div>
+        <div class="comparison-row"><span class="label">Tax + Ins${r.monthlyPMI > 0 ? ' + PMI' : ''}</span><span class="value">${formatCurrency(r.extrasBefore)}</span></div>
+        <div class="comparison-row primary highlight"><span class="label">Total Monthly</span><span class="value">${formatCurrency(r.totalMonthlyBefore)}</span></div>
+        <div class="comparison-row"><span class="label">Housing Ratio</span><span class="value">${r.housingRatioBefore}%</span></div>
+        <div class="comparison-row"><span class="label">Total Interest (30 yr)</span><span class="value">${formatCurrencyK(r.originalTotalInterest)}</span></div>
+      </div>
+    `;
+
+    // AFTER card - After recast
+    html += `
+      <div class="comparison-card after">
+        <div class="comparison-header">
+          <div class="comparison-icon">✓</div>
+          <div>
+            <div class="comparison-title">After ${formatCurrency(r.lumpAmount)} + Recast</div>
+            <div class="comparison-subtitle">What you'll actually pay (month ${r.lumpMonth}+)</div>
+          </div>
+        </div>
+        <div class="comparison-row"><span class="label">Lump Sum Applied</span><span class="value">${formatCurrency(r.lumpAmount)}</span></div>
+        <div class="comparison-row"><span class="label">New Loan Balance</span><span class="value">${formatCurrency(r.balanceAtRecast || r.loan - r.lumpAmount)}</span></div>
+        <div class="comparison-row primary"><span class="label">New Monthly P&I</span><span class="value">${formatCurrency(r.recastPayment || r.piPayment)}</span></div>
+        <div class="comparison-row"><span class="label">Tax + Ins${r.pmiRemoved ? '' : ' + PMI'}</span><span class="value">${formatCurrency(r.extrasAfter)}${r.pmiRemoved ? ' <span class="pmi-removed">PMI removed!</span>' : ''}</span></div>
+        <div class="comparison-row primary"><span class="label">New Total Monthly</span><span class="value">${formatCurrency(r.totalMonthlyAfter)}</span></div>
+        <div class="comparison-row"><span class="label">Housing Ratio</span><span class="value">${r.housingRatioAfter}%</span></div>
+        <div class="comparison-row"><span class="label">Total Interest</span><span class="value">${formatCurrencyK(r.totalInterest)}</span></div>
+        <div class="savings-badge">Save ${formatCurrency(r.monthlySavings)}/mo · ${formatCurrencyK(r.interestSaved)} total interest</div>
+      </div>
+    `;
+
+    html += `</div>`;
+
+    // Cash flow summary
+    html += `
+      <div class="two-col">
+        <div class="breakdown">
+          <div class="breakdown-title">Cash Deployment</div>
+          ${bdRow('Down Payment', formatCurrency(r.downPayment))}
+          ${bdRow('Closing Costs (~2%)', formatCurrency(r.closingCosts))}
+          ${bdRow('Cash to Close', formatCurrency(r.cashToClose), 'total')}
+          ${bdRow('Cash Remaining', formatCurrency(r.cashAfterClose))}
+          ${bdRow(`Lump Sum (month ${r.lumpMonth})`, '−' + formatCurrency(r.lumpAmount), 'highlight')}
+          ${bdRow('Final Cash Reserve', formatCurrency(r.cashAfterLump), 'total')}
+        </div>
+        <div class="breakdown">
+          <div class="breakdown-title">Monthly Breakdown (After Recast)</div>
+          ${bdRow('Principal & Interest', formatCurrency(r.recastPayment || r.piPayment))}
+          ${bdRow('Property Tax', formatCurrency(r.monthlyTax))}
+          ${bdRow('Insurance', formatCurrency(r.insurance))}
+          ${r.hoa > 0 ? bdRow('HOA', formatCurrency(r.hoa)) : ''}
+          ${r.monthlyMIP > 0 ? bdRow('FHA MIP', formatCurrency(r.monthlyMIP)) : ''}
+          ${r.monthlyPMI > 0 && !r.pmiRemoved ? bdRow('PMI', formatCurrency(r.monthlyPMI)) : ''}
+          ${r.pmiRemoved ? bdRow('PMI', '$0 (removed!)', 'highlight') : ''}
+          ${bdRow('Total', formatCurrency(r.totalMonthlyAfter), 'total')}
+        </div>
+      </div>
+    `;
+
+    // Income bar showing before/after
+    html += `
+      <div class="income-bar-wrap">
+        <div class="income-bar-header">
+          <div class="income-bar-title">Housing as % of ${formatCurrency(r.monthlyIncome)}/mo income</div>
+          <div class="income-bar-values">
+            <span><span class="swatch" style="background:var(--ink-4);margin-right:4px"></span>Before: ${r.housingRatioBefore}%</span>
+            <span><span class="swatch" style="background:var(--teal-mid);margin-right:4px"></span>After: ${r.housingRatioAfter}%</span>
+          </div>
+        </div>
+        <div class="income-bar-track">
+          <div class="income-bar-fill before" style="width:${Math.min(r.housingRatioBefore, 100)}%"></div>
+          <div class="income-bar-fill after" style="width:${Math.min(r.housingRatioAfter, 100)}%"></div>
+          <div class="income-bar-marker" style="left:43%" title="43% guideline"></div>
+        </div>
+        <div class="income-bar-legend">
+          <span>Red line = 43% DTI guideline (lender max)</span>
+        </div>
+      </div>
+    `;
+
+  } else {
+    // Simple view without lump sum
+    html += `<div class="metrics-row">`;
+    html += metric('Home Price', formatCurrency(r.homePrice), '');
+    html += metric('Down Payment', formatCurrency(r.downPayment), `${r.downPct.toFixed(1)}%`);
+    html += metric('Loan Amount', formatCurrency(r.loan), `@ ${r.interestRate}%`);
+    html += metric('Monthly P&I', formatCurrency(r.piPayment), '');
+    html += metric('Total Monthly', formatCurrency(r.totalMonthlyBefore), 'All-in', r.housingRatioBefore > 50 ? 'status-red' : r.housingRatioBefore > 40 ? 'status-amber' : 'status-green');
+    html += metric('Cash After Close', formatCurrency(r.cashAfterClose), '', r.cashAfterClose < 5000 ? 'status-red' : r.cashAfterClose < 25000 ? 'status-amber' : 'status-green');
+    html += metric('Total Interest', formatCurrencyK(r.originalTotalInterest), '30 years');
+    html += `</div>`;
+
+    html += `
+      <div class="two-col">
+        <div class="breakdown">
+          <div class="breakdown-title">Monthly Payment</div>
+          ${bdRow('Principal & Interest', formatCurrency(r.piPayment))}
+          ${bdRow('Property Tax', formatCurrency(r.monthlyTax))}
+          ${bdRow('Insurance', formatCurrency(r.insurance))}
+          ${r.hoa > 0 ? bdRow('HOA', formatCurrency(r.hoa)) : ''}
+          ${r.monthlyMIP > 0 ? bdRow('FHA MIP', formatCurrency(r.monthlyMIP)) : ''}
+          ${r.monthlyPMI > 0 ? bdRow('PMI', formatCurrency(r.monthlyPMI)) : ''}
+          ${bdRow('Total', formatCurrency(r.totalMonthlyBefore), 'total')}
+        </div>
+        <div class="breakdown">
+          <div class="breakdown-title">Cash at Closing</div>
+          ${bdRow('Down Payment', formatCurrency(r.downPayment))}
+          ${bdRow('Closing Costs (~2%)', formatCurrency(r.closingCosts))}
+          ${bdRow('Cash to Close', formatCurrency(r.cashToClose), 'total')}
+          ${bdRow('Remaining Reserve', formatCurrency(r.cashAfterClose))}
+        </div>
+      </div>
+    `;
+  }
+
+  // Warnings
+  if (r.loanType === 'fha') html += `<div class="callout warning"><div class="callout-title">FHA MIP</div>Cannot remove without refinancing into conventional.</div>`;
+  if (r.downPct < 20 && r.loanType === 'conventional') html += `<div class="callout warning"><div class="callout-title">PMI Required</div>Drops automatically at 22% equity.</div>`;
+
+  // Chart
+  html += `
+    <div class="chart-section">
+      <div class="chart-header">
+        <div class="chart-title">Loan Balance Over Time</div>
+      </div>
+      <div class="chart-legend">
+        ${r.hasLumpSum ? '<span><span class="swatch" style="background:#a8a59e"></span>Without Lump Sum</span>' : ''}
+        <span><span class="swatch" style="background:#3d7be8"></span>${r.hasLumpSum ? 'With Lump Sum + Recast' : 'Balance'}</span>
+        <span><span class="swatch" style="background:#1fa87f"></span>Equity</span>
+      </div>
+      <div class="chart-wrap"><canvas id="burndownChart"></canvas></div>
+    </div>
+  `;
+
+  document.getElementById('results').innerHTML = html;
+  renderChart(r);
+}
+
+function renderChart(r) {
+  const ctx = document.getElementById('burndownChart');
   if (!ctx) return;
-  new Chart(ctx, {
-    type:'line', data:{labels, datasets},
-    options:{
-      responsive:true, maintainAspectRatio:false,
-      interaction:{mode:'index',intersect:false},
-      plugins:{
-        legend:{display:false},
-        tooltip:{
-          callbacks:{
-            label: c => `${c.dataset.label}: ${fmt(c.parsed.y)}`,
-            footer: items => {
-              if (!totalInt) return [];
-              const intItem = items.find(i => i.dataset.label && i.dataset.label.toLowerCase().includes('interest'));
-              const paidSoFar = intItem ? intItem.parsed.y : 0;
-              const remaining = Math.max(0, totalInt - paidSoFar);
-              return [
-                '\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500',
-                'Total interest (full term): ' + fmt(totalInt),
-                'Interest still ahead: ' + fmt(remaining)
-              ];
-            }
-          },
-          footerFont: { size: 12, weight: 'normal' },
-          footerColor: 'rgba(255,255,255,0.65)',
-          footerMarginTop: 7,
-        }
-      },
-      scales:{
-        y:{min:yMin||0,ticks:{callback:v=>'$'+(v/1000).toFixed(0)+'K',color:'#6e6c67',font:{size:13}},grid:{color:'#e8e5de'}},
-        x:{ticks:{color:'#6e6c67',font:{size:13}},grid:{display:false}}
+  if (chartInstance) chartInstance.destroy();
+
+  const a = r.amortization;
+  const ao = r.amortOriginal;
+  const labels = a.balArr.map((_, i) => `Yr ${i}`);
+
+  const datasets = [];
+
+  if (r.hasLumpSum) {
+    datasets.push(
+      { label: 'Without Lump Sum', data: ao.balArr, borderColor: '#a8a59e', borderWidth: 1.5, borderDash: [4, 4], pointRadius: 0, tension: 0.3, fill: false },
+      { label: 'With Lump Sum', data: a.balArr, borderColor: '#3d7be8', borderWidth: 2.5, pointRadius: 0, tension: 0.3, fill: false },
+      { label: 'Equity', data: a.equityArr, borderColor: '#1fa87f', borderWidth: 2, pointRadius: 0, tension: 0.3, fill: false }
+    );
+  } else {
+    datasets.push(
+      { label: 'Balance', data: a.balArr, borderColor: '#3d7be8', borderWidth: 2, pointRadius: 0, tension: 0.3, fill: false },
+      { label: 'Equity', data: a.equityArr, borderColor: '#1fa87f', borderWidth: 2, pointRadius: 0, tension: 0.3, fill: false }
+    );
+  }
+
+  chartInstance = new Chart(ctx, {
+    type: 'line',
+    data: { labels, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => `${c.dataset.label}: ${formatCurrency(c.parsed.y)}` } } },
+      scales: {
+        y: { ticks: { callback: v => '$' + (v / 1000).toFixed(0) + 'K', color: '#6e6c67', font: { size: 11 } }, grid: { color: '#e8e5de' } },
+        x: { ticks: { color: '#6e6c67', font: { size: 11 } }, grid: { display: false } }
       }
     }
   });
 }
 
-function yearLabels(n) { return Array.from({length:n},(_,i)=>`Yr ${i}`); }
-
-function renderAll() {
-  const {scenarios:s, tax, ins} = calc(homePrice);
-
-  // Conv20
-  document.getElementById('m-conv20').innerHTML =
-    metricHTML('Down payment',fmt(s.conv20.down),'20% of purchase price') +
-    metricHTML('Loan amount',fmt(s.conv20.loan),'30yr fixed at 6.5%') +
-    metricHTML('Monthly P&I',fmt(s.conv20.pi),'Fixed for 30 years') +
-    metricHTML('Total monthly',fmt(s.conv20.total),`P&I + tax + ins`,pctCls(s.conv20.pct)) +
-    metricHTML('Cash after closing',fmt(s.conv20.cashLeft),'Emergency reserve',cashCls(s.conv20.cashLeft)) +
-    metricHTML('Total interest',fmtK(s.conv20.totalInt),'Over full 30 years');
-  document.getElementById('bd-conv20').innerHTML = bdTable('Monthly cost breakdown',[
-    {l:'Principal & interest',v:fmt(s.conv20.pi)},
-    {l:'Property tax (est. 1.2%)',v:fmt(s.conv20.tax)},
-    {l:'Homeowners insurance',v:fmt(s.conv20.ins)},
-  ],{l:'Total monthly housing',v:fmt(s.conv20.total)});
-  document.getElementById('ib-conv20').innerHTML = ibHTML(s.conv20.total, s.conv20.pct);
-  const c20 = s.conv20.amort;
-  mkChart('chart-conv20', yearLabels(c20.balArr.length),
-    [{label:'Remaining balance',data:c20.balArr,borderColor:'#3d7be8',backgroundColor:'rgba(61,123,232,0.07)',borderWidth:2,pointRadius:0,tension:0.3,fill:false},
-     {label:'Equity built',data:c20.equityArr,borderColor:'#1fa87f',backgroundColor:'rgba(31,168,127,0.07)',borderWidth:2,pointRadius:0,tension:0.3,fill:false},
-     {label:'Cumulative interest',data:c20.intArr,borderColor:'#e34948',backgroundColor:'rgba(227,73,72,0.06)',borderWidth:2,pointRadius:0,tension:0.3,fill:false}], 0, s.conv20.totalInt);
-
-  // Buydown
-  document.getElementById('m-buydown').innerHTML =
-    metricHTML('Down payment',fmt(s.buydown.down),'20% of purchase price') +
-    metricHTML('Point fee',fmt(s.buydown.point),'1% of loan amount') +
-    metricHTML('Rate after buydown','6.25%','vs 6.5% baseline') +
-    metricHTML('Monthly savings',fmt(s.buydown.savings)+'/mo',`Break-even: mo ${s.buydown.breakeven}`,'status-green') +
-    metricHTML('Total monthly',fmt(s.buydown.total),'P&I + tax + ins',pctCls(s.buydown.pct)) +
-    metricHTML('Cash after closing',fmt(s.buydown.cashLeft),'After down+closing+point',cashCls(s.buydown.cashLeft)) +
-    metricHTML('Total interest',fmtK(s.buydown.totalInt),'Over full 30 years');
-  document.getElementById('bd-buydown').innerHTML = bdTable('Cash needed at closing',[
-    {l:'Down payment (20%)',v:fmt(s.buydown.down)},
-    {l:'Closing costs (est. 2%)',v:fmt(s.buydown.closing)},
-    {l:'Buydown point fee',v:fmt(s.buydown.point)},
-  ],{l:'Total cash to close',v:fmt(s.buydown.down+s.buydown.closing+s.buydown.point)});
-  document.getElementById('ib-buydown').innerHTML = ibHTML(s.buydown.total, s.buydown.pct);
-  const cbd = s.buydown.amort;
-  mkChart('chart-buydown', yearLabels(cbd.balArr.length),
-    [{label:'Remaining balance',data:cbd.balArr,borderColor:'#3d7be8',backgroundColor:'rgba(61,123,232,0.07)',borderWidth:2,pointRadius:0,tension:0.3,fill:false},
-     {label:'Equity built',data:cbd.equityArr,borderColor:'#1fa87f',backgroundColor:'rgba(31,168,127,0.07)',borderWidth:2,pointRadius:0,tension:0.3,fill:false},
-     {label:'Cumulative interest',data:cbd.intArr,borderColor:'#e34948',backgroundColor:'rgba(227,73,72,0.06)',borderWidth:2,pointRadius:0,tension:0.3,fill:false}], 0, s.buydown.totalInt);
-
-  // Conv25
-  const retNote = s.conv25.retNeeded>0?`Needs ~${fmt(s.conv25.retNeeded)} retirement loan`:'No retirement loan needed';
-  document.getElementById('m-conv25').innerHTML =
-    metricHTML('Down payment',fmt(s.conv25.down),'25% of purchase price') +
-    metricHTML('Retirement loan needed',s.conv25.retNeeded>0?fmt(s.conv25.retNeeded):'$0',retNote,s.conv25.retNeeded>0?'status-amber':'status-green') +
-    metricHTML('Monthly P&I',fmt(s.conv25.pi),'Lowest conventional P&I') +
-    metricHTML('Total monthly',fmt(s.conv25.total),'P&I + tax + ins',pctCls(s.conv25.pct)) +
-    metricHTML('Cash after closing',fmt(s.conv25.cashLeft),'Reserve remaining',cashCls(s.conv25.cashLeft)) +
-    metricHTML('Total interest',fmtK(s.conv25.totalInt),'Over full 30 years');
-  document.getElementById('bd-conv25').innerHTML = bdTable('Monthly cost breakdown (excl. retirement repayment)',[
-    {l:'Principal & interest',v:fmt(s.conv25.pi)},
-    {l:'Property tax (est. 1.2%)',v:fmt(s.conv25.tax)},
-    {l:'Homeowners insurance',v:fmt(s.conv25.ins)},
-    {l:'Retirement loan repayment (est.)',v:s.conv25.retNeeded>0?'~$450–600/mo':'$0'},
-  ],{l:'Real total monthly (est.)',v:s.conv25.retNeeded>0?fmt(s.conv25.total+525)+' est.':fmt(s.conv25.total)});
-  document.getElementById('ib-conv25').innerHTML = ibHTML(s.conv25.total, s.conv25.pct);
-  const c25 = s.conv25.amort;
-  mkChart('chart-conv25', yearLabels(c25.balArr.length),
-    [{label:'Remaining balance',data:c25.balArr,borderColor:'#3d7be8',backgroundColor:'rgba(61,123,232,0.07)',borderWidth:2,pointRadius:0,tension:0.3,fill:false},
-     {label:'Equity built',data:c25.equityArr,borderColor:'#1fa87f',backgroundColor:'rgba(31,168,127,0.07)',borderWidth:2,pointRadius:0,tension:0.3,fill:false},
-     {label:'Cumulative interest',data:c25.intArr,borderColor:'#e34948',backgroundColor:'rgba(227,73,72,0.06)',borderWidth:2,pointRadius:0,tension:0.3,fill:false}], 0, s.conv25.totalInt);
-
-  // FHA
-  document.getElementById('m-fha').innerHTML =
-    metricHTML('Down payment',fmt(s.fha.down),'3.5% minimum FHA') +
-    metricHTML('Cash after closing',fmt(s.fha.cashLeft),'Strong liquidity reserve',cashCls(s.fha.cashLeft)) +
-    metricHTML('Upfront MIP',fmt(s.fha.mipUp),'Added to loan balance') +
-    metricHTML('Monthly MIP',fmt(s.fha.mip),'Cannot remove without refi','status-amber') +
-    metricHTML('Total monthly',fmt(s.fha.total),'P&I + MIP + tax + ins',pctCls(s.fha.pct)) +
-    metricHTML('Total interest',fmtK(s.fha.totalInt),'Over full 30 years');
-  document.getElementById('bd-fha').innerHTML = bdTable('Monthly cost breakdown',[
-    {l:'Principal & interest',v:fmt(s.fha.pi)},
-    {l:'Monthly MIP (0.55% annual)',v:fmt(s.fha.mip)},
-    {l:'Property tax (est. 1.2%)',v:fmt(s.fha.tax)},
-    {l:'Homeowners insurance',v:fmt(s.fha.ins)},
-  ],{l:'Total monthly housing',v:fmt(s.fha.total)});
-  document.getElementById('ib-fha').innerHTML = ibHTML(s.fha.total, s.fha.pct);
-  const cfa = s.fha.amort;
-  mkChart('chart-fha', yearLabels(cfa.balArr.length),
-    [{label:'Remaining balance',data:cfa.balArr,borderColor:'#3d7be8',backgroundColor:'rgba(61,123,232,0.07)',borderWidth:2,pointRadius:0,tension:0.3,fill:false},
-     {label:'Equity built',data:cfa.equityArr,borderColor:'#1fa87f',backgroundColor:'rgba(31,168,127,0.07)',borderWidth:2,pointRadius:0,tension:0.3,fill:false},
-     {label:'Cumulative interest',data:cfa.intArr,borderColor:'#e34948',backgroundColor:'rgba(227,73,72,0.06)',borderWidth:2,pointRadius:0,tension:0.3,fill:false}], 0, s.fha.totalInt);
-
-  // FHA + lump
-  const fl = s.fhalump;
-  const intSaved = s.fha.totalInt - fl.totalInt;
-  const payoffYr = fl.amort.balArr.findIndex(b=>b===0);
-  document.getElementById('m-fhalump').innerHTML =
-    metricHTML('Down payment',fmt(fl.down),'3.5% FHA — keeps cash liquid') +
-    metricHTML('Cash at closing',fmt(fl.cashLeft),'Before lump sum',cashCls(fl.cashLeft)) +
-    metricHTML('Lump sum (mo. 3)',fmt(LUMP),'Applied to principal','status-green') +
-    metricHTML('Cash after lump',fmt(fl.cashAfterLump),'Remaining reserve',cashCls(fl.cashAfterLump)) +
-    metricHTML('Total monthly',fmt(fl.total),'Unchanged after lump sum',pctCls(fl.pct)) +
-    metricHTML('Interest saved vs FHA',fmtK(intSaved),'vs plain FHA scenario','status-green') +
-    metricHTML('Total interest',fmtK(fl.totalInt),'Over accelerated term') +
-    metricHTML('Est. payoff',payoffYr>0?`~Yr ${payoffYr}`:'<30 yrs','Significantly earlier');
-  document.getElementById('bd-fhalump').innerHTML = bdTable('Cash flow around closing',[
-    {l:'Down payment (3.5%)',v:fmt(fl.down)},
-    {l:'Closing costs (est. 2%)',v:fmt(fl.closing)},
-    {l:'Cash remaining at close',v:fmt(fl.cashLeft)},
-    {l:'Lump sum to principal (mo. 3)',v:'-'+fmt(LUMP)},
-    {l:'Reserve after lump sum',v:fmt(fl.cashAfterLump)},
-  ],{l:'Monthly housing cost (unchanged)',v:fmt(fl.total)});
-  document.getElementById('ib-fhalump').innerHTML = ibHTML(fl.total, fl.pct);
-  const cfl = fl.amort;
-  mkChart('chart-fhalump', yearLabels(cfl.balArr.length),
-    [{label:'Remaining balance',data:cfl.balArr,borderColor:'#3d7be8',backgroundColor:'rgba(61,123,232,0.07)',borderWidth:2,pointRadius:0,tension:0.3,fill:false},
-     {label:'Equity built',data:cfl.equityArr,borderColor:'#1fa87f',backgroundColor:'rgba(31,168,127,0.07)',borderWidth:2,pointRadius:0,tension:0.3,fill:false},
-     {label:'Cumulative interest',data:cfl.intArr,borderColor:'#e34948',backgroundColor:'rgba(227,73,72,0.06)',borderWidth:2,pointRadius:0,tension:0.3,fill:false}], 0, fl.totalInt);
-
-  // HELOC
-  const h = s.heloc;
-  const baseYrs=Math.floor(h.base.payoffMonths/12), baseMo=h.base.payoffMonths%12;
-  const convTotalInt=s.conv20.totalInt;
-  document.getElementById('heloc-strip').innerHTML = `
-    <div class="compare-item"><div class="compare-label">HELOC rate</div><div class="compare-val">8.5%</div><div class="compare-sub">Prime today</div></div>
-    <div class="compare-divider"></div>
-    <div class="compare-item"><div class="compare-label">Payoff</div><div class="compare-val">${baseYrs} yr ${baseMo} mo</div><div class="compare-sub">vs 30yr conv.</div></div>
-    <div class="compare-divider"></div>
-    <div class="compare-item"><div class="compare-label">Total interest</div><div class="compare-val">${fmtK(h.base.totalInt)}</div><div class="compare-sub">vs ${fmtK(convTotalInt)} conv.</div></div>
-    <div class="compare-divider"></div>
-    <div class="compare-item"><div class="compare-label">Stress at 10%</div><div class="compare-val">${Math.floor(h.stress.payoffMonths/12)} yrs</div><div class="compare-sub">If prime rises</div></div>`;
-  document.getElementById('m-heloc').innerHTML =
-    metricHTML('Down payment',fmt(h.down),'20% — same as baseline') +
-    metricHTML('Cash after closing',fmt(h.cashLeft),'Emergency reserve',cashCls(h.cashLeft)) +
-    metricHTML('Month 1 interest',fmt(Math.round(h.loan*HELOC_RATE/12)),'Full balance, no compression yet') +
-    metricHTML('Effective interest',fmt(h.effInt),'After daily balance compression') +
-    metricHTML('Monthly surplus',fmt(h.surplus),'Attacks principal each month','status-green') +
-    metricHTML('Total interest (8.5%)',fmtK(h.base.totalInt),'If rate holds');
-  document.getElementById('bd-heloc').innerHTML = bdTable('Monthly outflow estimate',[
-    {l:'Effective interest (compressed)',v:fmt(h.effInt)},
-    {l:'Property tax (est. 1.2%)',v:fmt(h.tax)},
-    {l:'Homeowners insurance',v:fmt(h.ins)},
-    {l:'Living expenses (drawn)',v:fmt(EXPENSES)},
-  ],{l:'Total monthly outflow',v:fmt(h.effInt+h.tax+h.ins+EXPENSES)});
-  document.getElementById('ib-heloc').innerHTML = ibHTML(h.total, h.pct);
-
-  // HELOC chart — compare 3 balance lines + equity
-  const maxLen = Math.max(h.base.balArr.length, h.stress.balArr.length, s.conv20.amort.balArr.length);
-  const pad = (arr,len) => { const a=[...arr]; while(a.length<len)a.push(0); return a; };
-  const hLabels = yearLabels(maxLen);
-  mkChart('chart-heloc', hLabels,
-    [{label:'HELOC balance (8.5%)',data:pad(h.base.balArr,maxLen),borderColor:'#6b5ce7',backgroundColor:'rgba(107,92,231,0.07)',borderWidth:2.5,pointRadius:0,tension:0.3,fill:false},
-     {label:'HELOC balance (10% stress)',data:pad(h.stress.balArr,maxLen),borderColor:'#e34948',backgroundColor:'rgba(227,73,72,0.06)',borderWidth:2,borderDash:[5,4],pointRadius:0,tension:0.3,fill:false},
-     {label:'Conventional 6.5% (ref.)',data:pad(s.conv20.amort.balArr,maxLen),borderColor:'#3d7be8',backgroundColor:'rgba(61,123,232,0.05)',borderWidth:1.5,borderDash:[3,3],pointRadius:0,tension:0.3,fill:false},
-     {label:'HELOC equity built',data:pad(h.base.equityArr,maxLen),borderColor:'#1fa87f',backgroundColor:'rgba(31,168,127,0.07)',borderWidth:2,pointRadius:0,tension:0.3,fill:false}], 0, h.base.totalInt);
+function metric(label, value, sub, cls = '') {
+  return `<div class="metric"><div class="metric-label">${label}</div><div class="metric-value ${cls}">${value}</div>${sub ? `<div class="metric-sub">${sub}</div>` : ''}</div>`;
 }
 
-// Tabs
-document.querySelectorAll('.tab-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
+function bdRow(label, value, cls = '') {
+  return `<div class="breakdown-row ${cls}"><span class="row-label">${label}</span><span class="row-value">${value}</span></div>`;
+}
+
+function recalculate() {
+  updateDownDisplay();
+  const r = calculate();
+  render(r);
+  syncMonthlyDisplay(r);
+}
+
+// Sync monthly payment display to current calculation (when not actively sliding monthly)
+function syncMonthlyDisplay(r) {
+  if (isUpdating) return;
+  const targetInput = document.getElementById('targetMonthly');
+  const targetSlider = document.getElementById('monthlySlider');
+  const computed = r.hasLumpSum ? r.totalMonthlyAfter : r.totalMonthlyBefore;
+  targetInput.value = formatCurrency(computed);
+  targetSlider.value = Math.min(Math.max(computed, 1000), 10000);
+}
+
+// Slider event handlers
+function setupSliders() {
+  const homePriceInput = document.getElementById('homePrice');
+  const homePriceSlider = document.getElementById('homePriceSlider');
+  const downPaymentInput = document.getElementById('downPayment');
+  const downPaymentSlider = document.getElementById('downPaymentSlider');
+  const targetMonthlyInput = document.getElementById('targetMonthly');
+  const monthlySlider = document.getElementById('monthlySlider');
+  const rateInput = document.getElementById('interestRate');
+  const rateSlider = document.getElementById('rateSlider');
+
+  // Home Price slider → updates Monthly Payment (down % stays same)
+  homePriceSlider.addEventListener('input', () => {
+    homePriceInput.value = formatCurrency(parseInt(homePriceSlider.value));
+    recalculate();
   });
+  homePriceInput.addEventListener('change', () => {
+    const val = parseCurrency(homePriceInput.value);
+    homePriceSlider.value = Math.min(Math.max(val, 100000), 1500000);
+    recalculate();
+  });
+
+  // Down Payment slider → updates Monthly Payment
+  downPaymentSlider.addEventListener('input', () => {
+    downPaymentInput.value = parseFloat(downPaymentSlider.value).toFixed(1);
+    recalculate();
+  });
+  downPaymentInput.addEventListener('change', () => {
+    const val = parseFloat(downPaymentInput.value) || 0;
+    if (downMode === 'percent') {
+      downPaymentSlider.value = Math.min(Math.max(val, 0), 50);
+    }
+    recalculate();
+  });
+
+  // Monthly Payment slider → updates Home Price (keeping down %, rate, etc fixed)
+  monthlySlider.addEventListener('input', () => {
+    isUpdating = true;
+    targetMonthlyInput.value = formatCurrency(parseInt(monthlySlider.value));
+    solveForHomePrice();
+  });
+  targetMonthlyInput.addEventListener('change', () => {
+    isUpdating = true;
+    const val = parseCurrency(targetMonthlyInput.value);
+    monthlySlider.value = Math.min(Math.max(val, 1000), 10000);
+    solveForHomePrice();
+  });
+
+  // Interest Rate slider → updates Monthly Payment
+  rateSlider.addEventListener('input', () => {
+    rateInput.value = parseFloat(rateSlider.value).toFixed(3);
+    recalculate();
+  });
+  rateInput.addEventListener('change', () => {
+    const val = parseFloat(rateInput.value) || 7;
+    rateSlider.value = Math.min(Math.max(val, 4), 10);
+    recalculate();
+  });
+}
+
+// Solve for home price given target monthly payment (keeping down %, rate fixed)
+function solveForHomePrice() {
+  const targetMonthly = parseCurrency(document.getElementById('targetMonthly').value);
+  const downPct = parseFloat(document.getElementById('downPayment').value) / 100;
+  const rate = parseFloat(document.getElementById('interestRate').value) / 100;
+  const termMonths = parseInt(document.getElementById('loanTerm').value);
+  const taxRate = parseFloat(document.getElementById('taxRate').value) / 100;
+  const insurance = parseCurrency(document.getElementById('insurance').value);
+  const hoa = parseCurrency(document.getElementById('hoa').value);
+  const loanType = document.getElementById('loanType').value;
+
+  // Iterate to find home price (tax scales with price)
+  let homePrice = 500000;
+  const r = rate / 12;
+
+  for (let i = 0; i < 20; i++) {
+    const monthlyTax = (homePrice * taxRate) / 12;
+    const loan = homePrice * (1 - downPct);
+    const pmi = (loanType === 'conventional' && downPct < 0.2) ? loan * 0.005 / 12 : 0;
+    const targetPI = targetMonthly - monthlyTax - insurance - hoa - pmi;
+
+    if (targetPI <= 0) {
+      homePrice = homePrice * 0.9;
+      continue;
+    }
+
+    const maxLoan = targetPI * (Math.pow(1 + r, termMonths) - 1) / (r * Math.pow(1 + r, termMonths));
+    const impliedHomePrice = maxLoan / (1 - downPct);
+
+    if (Math.abs(impliedHomePrice - homePrice) < 1000) break;
+    homePrice = (homePrice + impliedHomePrice) / 2;
+  }
+
+  homePrice = Math.max(100000, Math.min(homePrice, 1500000));
+
+  document.getElementById('homePrice').value = formatCurrency(Math.round(homePrice));
+  document.getElementById('homePriceSlider').value = Math.round(homePrice);
+
+  isUpdating = false;
+  updateDownDisplay();
+  const calcResult = calculate();
+  render(calcResult);
+}
+
+// Event listeners for non-slider inputs
+document.querySelectorAll('input, select').forEach(el => {
+  if (!el.classList.contains('slider') &&
+      el.id !== 'targetMonthly' &&
+      el.id !== 'homePrice' &&
+      el.id !== 'downPayment' &&
+      el.id !== 'interestRate') {
+    el.addEventListener('input', recalculate);
+    el.addEventListener('change', recalculate);
+  }
 });
 
-// Slider
-const slider = document.getElementById('priceSlider');
-const display = document.getElementById('priceDisplay');
-slider.addEventListener('input', () => {
-  homePrice = parseInt(slider.value);
-  display.textContent = '$' + homePrice.toLocaleString();
-  renderAll();
+document.getElementById('hasLumpSum').addEventListener('change', toggleLumpSum);
+document.getElementById('loanType').addEventListener('change', function() {
+  const type = this.value;
+  const rateInput = document.getElementById('interestRate');
+  const rateSlider = document.getElementById('rateSlider');
+  if (type === 'fha') { rateInput.value = '6.875'; rateSlider.value = 6.875; }
+  else if (type === 'va') { rateInput.value = '6.75'; rateSlider.value = 6.75; }
+  else { rateInput.value = '7.25'; rateSlider.value = 7.25; }
+  recalculate();
 });
 
-renderAll();
+// Initial setup
+setupSliders();
+updateDownDisplay();
+recalculate();
 </script>
 </body>
 </html>

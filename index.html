@@ -151,6 +151,8 @@
 
   .savings-badge { display: inline-flex; align-items: center; gap: 4px; background: var(--teal); color: var(--white); padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; margin-top: 8px; }
   .pmi-removed { display: inline-block; background: var(--teal); color: var(--white); font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 4px; margin-left: 6px; text-transform: uppercase; letter-spacing: 0.03em; }
+  .pmi-applied { display: inline-block; background: var(--coral); color: var(--white); font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 4px; margin-left: 6px; text-transform: uppercase; letter-spacing: 0.03em; }
+  .pmi-note { color: var(--ink-4); font-size: 11px; font-weight: 500; margin-left: 4px; }
 
   /* Simple metrics for non-lump-sum view */
   .metrics-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin-bottom: 1rem; }
@@ -558,10 +560,10 @@ function render(r) {
         </div>
       </div>
       <div class="comparison-row"><span class="label">Home Price</span><span class="value">${formatCurrency(r.homePrice)}</span></div>
-      <div class="comparison-row"><span class="label">Down Payment</span><span class="value">${formatCurrency(r.downPayment)} (${r.downPct.toFixed(1)}%)</span></div>
+      <div class="comparison-row"><span class="label">Down Payment</span><span class="value">${formatCurrency(r.downPayment)} (${r.downPct.toFixed(1)}%)${r.monthlyPMI > 0 ? ' <span class="pmi-applied">PMI applies</span>' : ''}</span></div>
       <div class="comparison-row"><span class="label">Loan Amount</span><span class="value">${formatCurrency(r.loan)}</span></div>
       <div class="comparison-row primary"><span class="label">Monthly P&I</span><span class="value">${formatCurrency(r.piPayment)}</span></div>
-      <div class="comparison-row"><span class="label">Tax + Ins${r.monthlyPMI > 0 ? ' + PMI' : ''}</span><span class="value">${formatCurrency(r.extrasBefore)}</span></div>
+      <div class="comparison-row"><span class="label">Tax + Ins${r.monthlyPMI > 0 ? ' + PMI' : ''}</span><span class="value">${formatCurrency(r.extrasBefore)}${r.monthlyPMI > 0 ? ' <span class="pmi-note">(+$' + r.monthlyPMI + ' PMI)</span>' : ''}</span></div>
       <div class="comparison-row primary highlight"><span class="label">Total Monthly</span><span class="value">${formatCurrency(r.totalMonthlyBefore)}</span></div>
       <div class="comparison-row"><span class="label">Housing Ratio</span><span class="value">${r.housingRatioBefore}%</span></div>
       <div class="comparison-row"><span class="label">Total Interest (30 yr)</span><span class="value">${formatCurrencyK(r.originalTotalInterest)}</span></div>

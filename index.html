@@ -75,8 +75,8 @@
   .checkbox-inline { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ink-2); cursor: pointer; }
   .checkbox-inline input { width: 16px; height: 16px; accent-color: var(--gold-mid); cursor: pointer; }
 
-  .lump-section { background: var(--gold-light); border: 1px solid rgba(196,154,0,0.25); border-radius: var(--radius); padding: 1rem; margin-top: 0.75rem; display: none; }
-  .lump-section.show { display: block; }
+  .lump-section { background: var(--gold-light); border: 1px solid rgba(196,154,0,0.25); border-radius: var(--radius); padding: 1rem; margin-top: 0.75rem; }
+  .lump-section-title { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gold); margin-bottom: 12px; }
   .lump-section .input-grid { gap: 10px 14px; }
   .lump-hint { font-size: 12px; color: var(--gold); margin-top: 8px; line-height: 1.5; }
 
@@ -328,16 +328,10 @@
           <span class="input-suffix">/mo</span>
         </div>
       </div>
-
-      <div class="form-group" style="grid-column: span 2;">
-        <label class="checkbox-inline">
-          <input type="checkbox" id="hasLumpSum" checked>
-          <span>I plan to make a lump-sum payment after closing</span>
-        </label>
-      </div>
     </div>
 
     <div class="lump-section show" id="lumpSection">
+      <div class="lump-section-title">Lump Sum + Recast Strategy</div>
       <div class="input-grid">
         <div class="form-group">
           <label class="form-label">Lump Sum Amount</label>
@@ -347,13 +341,6 @@
         <div class="form-group">
           <label class="form-label">Apply at Month</label>
           <input type="number" class="form-input" id="lumpMonth" value="2" min="1" max="360" style="width: 70px;">
-        </div>
-
-        <div class="form-group">
-          <label class="checkbox-inline">
-            <input type="checkbox" id="doRecast" checked>
-            <span>Request recast (lower monthly payment)</span>
-          </label>
         </div>
       </div>
       <p class="lump-hint">The lender qualifies you on the larger payment. After closing, pay down the principal and request a recast to lower your monthly payment.</p>
@@ -413,12 +400,6 @@ function updateDownDisplay() {
     const pct = homePrice > 0 ? ((downVal / homePrice) * 100).toFixed(1) : 0;
     display.textContent = `= ${pct}%`;
   }
-}
-
-function toggleLumpSum() {
-  const checked = document.getElementById('hasLumpSum').checked;
-  document.getElementById('lumpSection').classList.toggle('show', checked);
-  recalculate();
 }
 
 // Amortization
@@ -488,10 +469,9 @@ function calculate() {
   const hoa = parseCurrency(document.getElementById('hoa').value);
   const cashAvailable = parseCurrency(document.getElementById('cashAvailable').value);
   const monthlyIncome = parseCurrency(document.getElementById('monthlyIncome').value);
-  const hasLumpSum = document.getElementById('hasLumpSum').checked;
-  const lumpAmount = hasLumpSum ? parseCurrency(document.getElementById('lumpAmount').value) : 0;
-  const lumpMonth = hasLumpSum ? parseInt(document.getElementById('lumpMonth').value) || 2 : 0;
-  const doRecast = hasLumpSum ? document.getElementById('doRecast').checked : false;
+  const lumpAmount = parseCurrency(document.getElementById('lumpAmount').value);
+  const lumpMonth = parseInt(document.getElementById('lumpMonth').value) || 2;
+  const doRecast = true; // Always recast after lump sum
 
   const downPayment = downMode === 'dollar' ? downVal : homePrice * (downVal / 100);
   const downPct = (downPayment / homePrice) * 100;
@@ -521,7 +501,7 @@ function calculate() {
   // Check if lump sum brings equity to 20%+ (PMI can be removed)
   let monthlyPMIAfter = monthlyPMI;
   let pmiRemoved = false;
-  if (hasLumpSum && loanType === 'conventional' && monthlyPMI > 0) {
+  if (loanType === 'conventional' && monthlyPMI > 0) {
     const equityAfterLump = downPayment + lumpAmount;
     const ltvAfterLump = (homePrice - equityAfterLump) / homePrice;
     if (ltvAfterLump <= 0.80) {
@@ -538,7 +518,7 @@ function calculate() {
 
   const cashToClose = downPayment + closingCosts;
   const cashAfterClose = cashAvailable - cashToClose;
-  const cashAfterLump = hasLumpSum ? cashAfterClose - lumpAmount : cashAfterClose;
+  const cashAfterLump = cashAfterClose - lumpAmount;
 
   const housingRatioBefore = Math.round((totalMonthlyBefore / monthlyIncome) * 100);
   const housingRatioAfter = Math.round((totalMonthlyAfter / monthlyIncome) * 100);
@@ -553,7 +533,7 @@ function calculate() {
     recastPayment: amort.recastPayment,
     balanceAtRecast: amort.balanceAtRecast,
     cashToClose, cashAfterClose, cashAfterLump,
-    hasLumpSum, lumpAmount, lumpMonth, doRecast,
+    lumpAmount, lumpMonth, doRecast,
     monthlyIncome, housingRatioBefore, housingRatioAfter,
     totalInterest: amort.totalInt, originalTotalInterest: amortOriginal.totalInt,
     interestSaved, amortization: amort, amortOriginal,
@@ -564,135 +544,99 @@ function calculate() {
 function render(r) {
   let html = '';
 
-  if (r.hasLumpSum) {
-    // Before/After comparison view
-    html += `<div class="comparison-container">`;
+  // Before/After comparison view
+  html += `<div class="comparison-container">`;
 
-    // BEFORE card - What lender sees
-    html += `
-      <div class="comparison-card before">
-        <div class="comparison-header">
-          <div class="comparison-icon">🏦</div>
-          <div>
-            <div class="comparison-title">What the Lender Sees</div>
-            <div class="comparison-subtitle">They qualify you on this payment</div>
-          </div>
-        </div>
-        <div class="comparison-row"><span class="label">Home Price</span><span class="value">${formatCurrency(r.homePrice)}</span></div>
-        <div class="comparison-row"><span class="label">Down Payment</span><span class="value">${formatCurrency(r.downPayment)} (${r.downPct.toFixed(1)}%)</span></div>
-        <div class="comparison-row"><span class="label">Loan Amount</span><span class="value">${formatCurrency(r.loan)}</span></div>
-        <div class="comparison-row primary"><span class="label">Monthly P&I</span><span class="value">${formatCurrency(r.piPayment)}</span></div>
-        <div class="comparison-row"><span class="label">Tax + Ins${r.monthlyPMI > 0 ? ' + PMI' : ''}</span><span class="value">${formatCurrency(r.extrasBefore)}</span></div>
-        <div class="comparison-row primary highlight"><span class="label">Total Monthly</span><span class="value">${formatCurrency(r.totalMonthlyBefore)}</span></div>
-        <div class="comparison-row"><span class="label">Housing Ratio</span><span class="value">${r.housingRatioBefore}%</span></div>
-        <div class="comparison-row"><span class="label">Total Interest (30 yr)</span><span class="value">${formatCurrencyK(r.originalTotalInterest)}</span></div>
-      </div>
-    `;
-
-    // AFTER card - After recast
-    html += `
-      <div class="comparison-card after">
-        <div class="comparison-header">
-          <div class="comparison-icon">✓</div>
-          <div>
-            <div class="comparison-title">After ${formatCurrency(r.lumpAmount)} + Recast</div>
-            <div class="comparison-subtitle">What you'll actually pay (month ${r.lumpMonth}+)</div>
-          </div>
-        </div>
-        <div class="comparison-row"><span class="label">Lump Sum Applied</span><span class="value">${formatCurrency(r.lumpAmount)}</span></div>
-        <div class="comparison-row"><span class="label">New Loan Balance</span><span class="value">${formatCurrency(r.balanceAtRecast || r.loan - r.lumpAmount)}</span></div>
-        <div class="comparison-row primary"><span class="label">New Monthly P&I</span><span class="value">${formatCurrency(r.recastPayment || r.piPayment)}</span></div>
-        <div class="comparison-row"><span class="label">Tax + Ins${r.pmiRemoved ? '' : ' + PMI'}</span><span class="value">${formatCurrency(r.extrasAfter)}${r.pmiRemoved ? ' <span class="pmi-removed">PMI removed!</span>' : ''}</span></div>
-        <div class="comparison-row primary"><span class="label">New Total Monthly</span><span class="value">${formatCurrency(r.totalMonthlyAfter)}</span></div>
-        <div class="comparison-row"><span class="label">Housing Ratio</span><span class="value">${r.housingRatioAfter}%</span></div>
-        <div class="comparison-row"><span class="label">Total Interest</span><span class="value">${formatCurrencyK(r.totalInterest)}</span></div>
-        <div class="savings-badge">Save ${formatCurrency(r.monthlySavings)}/mo · ${formatCurrencyK(r.interestSaved)} total interest</div>
-      </div>
-    `;
-
-    html += `</div>`;
-
-    // Cash flow summary
-    html += `
-      <div class="two-col">
-        <div class="breakdown">
-          <div class="breakdown-title">Cash Deployment</div>
-          ${bdRow('Down Payment', formatCurrency(r.downPayment))}
-          ${bdRow('Closing Costs (~2%)', formatCurrency(r.closingCosts))}
-          ${bdRow('Cash to Close', formatCurrency(r.cashToClose), 'total')}
-          ${bdRow('Cash Remaining', formatCurrency(r.cashAfterClose))}
-          ${bdRow(`Lump Sum (month ${r.lumpMonth})`, '−' + formatCurrency(r.lumpAmount), 'highlight')}
-          ${bdRow('Final Cash Reserve', formatCurrency(r.cashAfterLump), 'total')}
-        </div>
-        <div class="breakdown">
-          <div class="breakdown-title">Monthly Breakdown (After Recast)</div>
-          ${bdRow('Principal & Interest', formatCurrency(r.recastPayment || r.piPayment))}
-          ${bdRow('Property Tax', formatCurrency(r.monthlyTax))}
-          ${bdRow('Insurance', formatCurrency(r.insurance))}
-          ${r.hoa > 0 ? bdRow('HOA', formatCurrency(r.hoa)) : ''}
-          ${r.monthlyMIP > 0 ? bdRow('FHA MIP', formatCurrency(r.monthlyMIP)) : ''}
-          ${r.monthlyPMI > 0 && !r.pmiRemoved ? bdRow('PMI', formatCurrency(r.monthlyPMI)) : ''}
-          ${r.pmiRemoved ? bdRow('PMI', '$0 (removed!)', 'highlight') : ''}
-          ${bdRow('Total', formatCurrency(r.totalMonthlyAfter), 'total')}
+  // BEFORE card - What lender sees
+  html += `
+    <div class="comparison-card before">
+      <div class="comparison-header">
+        <div class="comparison-icon">🏦</div>
+        <div>
+          <div class="comparison-title">What the Lender Sees</div>
+          <div class="comparison-subtitle">They qualify you on this payment</div>
         </div>
       </div>
-    `;
+      <div class="comparison-row"><span class="label">Home Price</span><span class="value">${formatCurrency(r.homePrice)}</span></div>
+      <div class="comparison-row"><span class="label">Down Payment</span><span class="value">${formatCurrency(r.downPayment)} (${r.downPct.toFixed(1)}%)</span></div>
+      <div class="comparison-row"><span class="label">Loan Amount</span><span class="value">${formatCurrency(r.loan)}</span></div>
+      <div class="comparison-row primary"><span class="label">Monthly P&I</span><span class="value">${formatCurrency(r.piPayment)}</span></div>
+      <div class="comparison-row"><span class="label">Tax + Ins${r.monthlyPMI > 0 ? ' + PMI' : ''}</span><span class="value">${formatCurrency(r.extrasBefore)}</span></div>
+      <div class="comparison-row primary highlight"><span class="label">Total Monthly</span><span class="value">${formatCurrency(r.totalMonthlyBefore)}</span></div>
+      <div class="comparison-row"><span class="label">Housing Ratio</span><span class="value">${r.housingRatioBefore}%</span></div>
+      <div class="comparison-row"><span class="label">Total Interest (30 yr)</span><span class="value">${formatCurrencyK(r.originalTotalInterest)}</span></div>
+    </div>
+  `;
 
-    // Income bar showing before/after
-    html += `
-      <div class="income-bar-wrap">
-        <div class="income-bar-header">
-          <div class="income-bar-title">Housing as % of ${formatCurrency(r.monthlyIncome)}/mo income</div>
-          <div class="income-bar-values">
-            <span><span class="swatch" style="background:var(--ink-4);margin-right:4px"></span>Before: ${r.housingRatioBefore}%</span>
-            <span><span class="swatch" style="background:var(--teal-mid);margin-right:4px"></span>After: ${r.housingRatioAfter}%</span>
-          </div>
-        </div>
-        <div class="income-bar-track">
-          <div class="income-bar-fill before" style="width:${Math.min(r.housingRatioBefore, 100)}%"></div>
-          <div class="income-bar-fill after" style="width:${Math.min(r.housingRatioAfter, 100)}%"></div>
-          <div class="income-bar-marker" style="left:43%" title="43% guideline"></div>
-        </div>
-        <div class="income-bar-legend">
-          <span>Red line = 43% DTI guideline (lender max)</span>
+  // AFTER card - After recast
+  html += `
+    <div class="comparison-card after">
+      <div class="comparison-header">
+        <div class="comparison-icon">✓</div>
+        <div>
+          <div class="comparison-title">After ${formatCurrency(r.lumpAmount)} + Recast</div>
+          <div class="comparison-subtitle">What you'll actually pay (month ${r.lumpMonth}+)</div>
         </div>
       </div>
-    `;
+      <div class="comparison-row"><span class="label">Lump Sum Applied</span><span class="value">${formatCurrency(r.lumpAmount)}</span></div>
+      <div class="comparison-row"><span class="label">New Loan Balance</span><span class="value">${formatCurrency(r.balanceAtRecast || r.loan - r.lumpAmount)}</span></div>
+      <div class="comparison-row primary"><span class="label">New Monthly P&I</span><span class="value">${formatCurrency(r.recastPayment || r.piPayment)}</span></div>
+      <div class="comparison-row"><span class="label">Tax + Ins${r.pmiRemoved ? '' : ' + PMI'}</span><span class="value">${formatCurrency(r.extrasAfter)}${r.pmiRemoved ? ' <span class="pmi-removed">PMI removed!</span>' : ''}</span></div>
+      <div class="comparison-row primary"><span class="label">New Total Monthly</span><span class="value">${formatCurrency(r.totalMonthlyAfter)}</span></div>
+      <div class="comparison-row"><span class="label">Housing Ratio</span><span class="value">${r.housingRatioAfter}%</span></div>
+      <div class="comparison-row"><span class="label">Total Interest</span><span class="value">${formatCurrencyK(r.totalInterest)}</span></div>
+      <div class="savings-badge">Save ${formatCurrency(r.monthlySavings)}/mo · ${formatCurrencyK(r.interestSaved)} total interest</div>
+    </div>
+  `;
 
-  } else {
-    // Simple view without lump sum
-    html += `<div class="metrics-row">`;
-    html += metric('Home Price', formatCurrency(r.homePrice), '');
-    html += metric('Down Payment', formatCurrency(r.downPayment), `${r.downPct.toFixed(1)}%`);
-    html += metric('Loan Amount', formatCurrency(r.loan), `@ ${r.interestRate}%`);
-    html += metric('Monthly P&I', formatCurrency(r.piPayment), '');
-    html += metric('Total Monthly', formatCurrency(r.totalMonthlyBefore), 'All-in', r.housingRatioBefore > 50 ? 'status-red' : r.housingRatioBefore > 40 ? 'status-amber' : 'status-green');
-    html += metric('Cash After Close', formatCurrency(r.cashAfterClose), '', r.cashAfterClose < 5000 ? 'status-red' : r.cashAfterClose < 25000 ? 'status-amber' : 'status-green');
-    html += metric('Total Interest', formatCurrencyK(r.originalTotalInterest), '30 years');
-    html += `</div>`;
+  html += `</div>`;
 
-    html += `
-      <div class="two-col">
-        <div class="breakdown">
-          <div class="breakdown-title">Monthly Payment</div>
-          ${bdRow('Principal & Interest', formatCurrency(r.piPayment))}
-          ${bdRow('Property Tax', formatCurrency(r.monthlyTax))}
-          ${bdRow('Insurance', formatCurrency(r.insurance))}
-          ${r.hoa > 0 ? bdRow('HOA', formatCurrency(r.hoa)) : ''}
-          ${r.monthlyMIP > 0 ? bdRow('FHA MIP', formatCurrency(r.monthlyMIP)) : ''}
-          ${r.monthlyPMI > 0 ? bdRow('PMI', formatCurrency(r.monthlyPMI)) : ''}
-          ${bdRow('Total', formatCurrency(r.totalMonthlyBefore), 'total')}
-        </div>
-        <div class="breakdown">
-          <div class="breakdown-title">Cash at Closing</div>
-          ${bdRow('Down Payment', formatCurrency(r.downPayment))}
-          ${bdRow('Closing Costs (~2%)', formatCurrency(r.closingCosts))}
-          ${bdRow('Cash to Close', formatCurrency(r.cashToClose), 'total')}
-          ${bdRow('Remaining Reserve', formatCurrency(r.cashAfterClose))}
+  // Cash flow summary
+  html += `
+    <div class="two-col">
+      <div class="breakdown">
+        <div class="breakdown-title">Cash Deployment</div>
+        ${bdRow('Down Payment', formatCurrency(r.downPayment))}
+        ${bdRow('Closing Costs (~2%)', formatCurrency(r.closingCosts))}
+        ${bdRow('Cash to Close', formatCurrency(r.cashToClose), 'total')}
+        ${bdRow('Cash Remaining', formatCurrency(r.cashAfterClose))}
+        ${bdRow(`Lump Sum (month ${r.lumpMonth})`, '−' + formatCurrency(r.lumpAmount), 'highlight')}
+        ${bdRow('Final Cash Reserve', formatCurrency(r.cashAfterLump), 'total')}
+      </div>
+      <div class="breakdown">
+        <div class="breakdown-title">Monthly Breakdown (After Recast)</div>
+        ${bdRow('Principal & Interest', formatCurrency(r.recastPayment || r.piPayment))}
+        ${bdRow('Property Tax', formatCurrency(r.monthlyTax))}
+        ${bdRow('Insurance', formatCurrency(r.insurance))}
+        ${r.hoa > 0 ? bdRow('HOA', formatCurrency(r.hoa)) : ''}
+        ${r.monthlyMIP > 0 ? bdRow('FHA MIP', formatCurrency(r.monthlyMIP)) : ''}
+        ${r.monthlyPMI > 0 && !r.pmiRemoved ? bdRow('PMI', formatCurrency(r.monthlyPMI)) : ''}
+        ${r.pmiRemoved ? bdRow('PMI', '$0 (removed!)', 'highlight') : ''}
+        ${bdRow('Total', formatCurrency(r.totalMonthlyAfter), 'total')}
+      </div>
+    </div>
+  `;
+
+  // Income bar showing before/after
+  html += `
+    <div class="income-bar-wrap">
+      <div class="income-bar-header">
+        <div class="income-bar-title">Housing as % of ${formatCurrency(r.monthlyIncome)}/mo income</div>
+        <div class="income-bar-values">
+          <span><span class="swatch" style="background:var(--ink-4);margin-right:4px"></span>Before: ${r.housingRatioBefore}%</span>
+          <span><span class="swatch" style="background:var(--teal-mid);margin-right:4px"></span>After: ${r.housingRatioAfter}%</span>
         </div>
       </div>
-    `;
-  }
+      <div class="income-bar-track">
+        <div class="income-bar-fill before" style="width:${Math.min(r.housingRatioBefore, 100)}%"></div>
+        <div class="income-bar-fill after" style="width:${Math.min(r.housingRatioAfter, 100)}%"></div>
+        <div class="income-bar-marker" style="left:43%" title="43% guideline"></div>
+      </div>
+      <div class="income-bar-legend">
+        <span>Red line = 43% DTI guideline (lender max)</span>
+      </div>
+    </div>
+  `;
 
   // Warnings
   if (r.loanType === 'fha') html += `<div class="callout warning"><div class="callout-title">FHA MIP</div>Cannot remove without refinancing into conventional.</div>`;
@@ -705,8 +649,8 @@ function render(r) {
         <div class="chart-title">Loan Balance Over Time</div>
       </div>
       <div class="chart-legend">
-        ${r.hasLumpSum ? '<span><span class="swatch" style="background:#a8a59e"></span>Without Lump Sum</span>' : ''}
-        <span><span class="swatch" style="background:#3d7be8"></span>${r.hasLumpSum ? 'With Lump Sum + Recast' : 'Balance'}</span>
+        <span><span class="swatch" style="background:#a8a59e"></span>Without Lump Sum</span>
+        <span><span class="swatch" style="background:#3d7be8"></span>With Lump Sum + Recast</span>
         <span><span class="swatch" style="background:#1fa87f"></span>Equity</span>
       </div>
       <div class="chart-wrap"><canvas id="burndownChart"></canvas></div>
@@ -726,20 +670,11 @@ function renderChart(r) {
   const ao = r.amortOriginal;
   const labels = a.balArr.map((_, i) => `Yr ${i}`);
 
-  const datasets = [];
-
-  if (r.hasLumpSum) {
-    datasets.push(
-      { label: 'Without Lump Sum', data: ao.balArr, borderColor: '#a8a59e', borderWidth: 1.5, borderDash: [4, 4], pointRadius: 0, tension: 0.3, fill: false },
-      { label: 'With Lump Sum', data: a.balArr, borderColor: '#3d7be8', borderWidth: 2.5, pointRadius: 0, tension: 0.3, fill: false },
-      { label: 'Equity', data: a.equityArr, borderColor: '#1fa87f', borderWidth: 2, pointRadius: 0, tension: 0.3, fill: false }
-    );
-  } else {
-    datasets.push(
-      { label: 'Balance', data: a.balArr, borderColor: '#3d7be8', borderWidth: 2, pointRadius: 0, tension: 0.3, fill: false },
-      { label: 'Equity', data: a.equityArr, borderColor: '#1fa87f', borderWidth: 2, pointRadius: 0, tension: 0.3, fill: false }
-    );
-  }
+  const datasets = [
+    { label: 'Without Lump Sum', data: ao.balArr, borderColor: '#a8a59e', borderWidth: 1.5, borderDash: [4, 4], pointRadius: 0, tension: 0.3, fill: false },
+    { label: 'With Lump Sum', data: a.balArr, borderColor: '#3d7be8', borderWidth: 2.5, pointRadius: 0, tension: 0.3, fill: false },
+    { label: 'Equity', data: a.equityArr, borderColor: '#1fa87f', borderWidth: 2, pointRadius: 0, tension: 0.3, fill: false }
+  ];
 
   chartInstance = new Chart(ctx, {
     type: 'line',
@@ -776,7 +711,7 @@ function syncMonthlyDisplay(r) {
   if (isUpdating) return;
   const targetInput = document.getElementById('targetMonthly');
   const targetSlider = document.getElementById('monthlySlider');
-  const computed = r.hasLumpSum ? r.totalMonthlyAfter : r.totalMonthlyBefore;
+  const computed = r.totalMonthlyAfter;
   targetInput.value = formatCurrency(computed);
   targetSlider.value = Math.min(Math.max(computed, 1000), 10000);
 }
@@ -897,7 +832,6 @@ document.querySelectorAll('input, select').forEach(el => {
   }
 });
 
-document.getElementById('hasLumpSum').addEventListener('change', toggleLumpSum);
 document.getElementById('loanType').addEventListener('change', function() {
   const type = this.value;
   const rateInput = document.getElementById('interestRate');
